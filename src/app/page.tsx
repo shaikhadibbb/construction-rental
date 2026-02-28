@@ -8,9 +8,17 @@ export default async function HomePage() {
     .limit(3)
     .order('created_at', { ascending: true })
 
+  const { count: equipmentCount } = await supabase
+    .from('equipment')
+    .select('*', { count: 'exact', head: true })
+
+  const { count: bookingCount } = await supabase
+    .from('bookings')
+    .select('*', { count: 'exact', head: true })
+
   const stats = [
-    { value: '50+', label: 'Equipment Items' },
-    { value: '200+', label: 'Happy Customers' },
+    { value: (equipmentCount || 0) + '+', label: 'Equipment Items' },
+    { value: (bookingCount || 0) + '+', label: 'Bookings Made' },
     { value: '24/7', label: 'Support' },
     { value: '5★', label: 'Rated Service' },
   ]
@@ -128,13 +136,13 @@ export default async function HomePage() {
           <p className="text-gray-500 mb-14">Rent equipment in 3 simple steps</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {[
-              { step: '01', title: 'Browse & Choose', desc: 'Search our catalog of 50+ equipment items by category or name', emoji: '🔍' },
-              { step: '02', title: 'Book Online',     desc: 'Select your dates, see the total price instantly, confirm with one click', emoji: '📅' },
-              { step: '03', title: 'Get to Work',     desc: 'Pick up your equipment and get your project moving', emoji: '🚀' },
+              { step: '01', title: 'Browse & Choose', desc: 'Search our catalog of equipment by category or name', emoji: '🔍' },
+              { step: '02', title: 'Book Online', desc: 'Select your dates, see the total price instantly, confirm with one click', emoji: '📅' },
+              { step: '03', title: 'Get to Work', desc: 'Pick up your equipment and get your project moving', emoji: '🚀' },
             ].map((step) => (
               <div key={step.step} className="bg-white rounded-2xl p-8 border border-gray-200 relative">
                 <span className="text-5xl block mb-4">{step.emoji}</span>
-                <span className="absolute top-4 right-4 text-xs font-bold text-gray-200 text-4xl">{step.step}</span>
+                <span className="absolute top-4 right-4 text-4xl font-bold text-gray-100">{step.step}</span>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
               </div>
@@ -147,7 +155,7 @@ export default async function HomePage() {
       <section className="py-20 px-4 bg-gray-900 text-white text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-gray-400 mb-8 text-lg">Join hundreds of contractors who trust ConstructRent for their equipment needs.</p>
+          <p className="text-gray-400 mb-8 text-lg">Join contractors who trust ConstructRent for their equipment needs.</p>
           <Link href="/register" className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-10 py-4 rounded-xl text-lg transition-colors inline-block">
             Create Free Account →
           </Link>
