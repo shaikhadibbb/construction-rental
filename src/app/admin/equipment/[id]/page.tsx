@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
@@ -9,9 +9,11 @@ export default function EditEquipmentPage() {
   const router = useRouter()
   const params = useParams()
   const id = params.id as string
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -21,17 +23,13 @@ export default function EditEquipmentPage() {
     category: '',
     daily_rate: '',
     image_url: '',
+    images: [] as string[],
     is_available: true,
   })
 
   useEffect(() => {
     const fetchEquipment = async () => {
-      const { data } = await supabase
-        .from('equipment')
-        .select('*')
-        .eq('id', id)
-        .single()
-
+      const { data } = await supabase.from('equipment').select('*').eq('id', id).single()
       if (data) {
         setForm({
           name: data.name || '',
@@ -39,6 +37,7 @@ export default function EditEquipmentPage() {
           category: data.category || '',
           daily_rate: data.daily_rate?.toString() || '',
           image_url: data.image_url || '',
+          images: data.images || [],
           is_available: data.is_available ?? true,
         })
       }
@@ -47,143 +46,199 @@ export default function EditEquipmentPage() {
     fetchEquipment()
   }, [id])
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setUploading(true)
+
+    const uploadedUrls: string[] = []
+
+    for (const file of Array.from(files)) {
+      const ext = file.name.split('.').pop()
+      const fileName = `${id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('equipment-images')
+        .upload(fileName, file, { upsert: true })
+
+      if (uploadError) {
+        setError('Upload failed: ' + uploadError.message)
+        continue
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('equipment-images')
+        .getPublicUrl(fileName)
+
+      uploadedUrls.push(urlData.publicUrl)
+    }
+
+    if (uploadedUrls.length > 0) {
+      const allImages = [...form.images, ...uploadedUrls]
+      setForm(prev => ({
+        ...prev,
+        images: allImages,
+        image_url: prev.image_url || uploadedUrls[0],
+      }))
+    }
+
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const removeImage = async (url: string) => {
+    const updated = form.images.filter(img => img !== url)
+    setForm(prev => ({
+      ...prev,
+      images: updated,
+      image_url: prev.image_url === url ? (updated[0] || '') : prev.image_url,
+    }))
+  }
+
+  const setMainImage = (url: string) => {
+    setForm(prev => ({ ...prev, image_url: url }))
+  }
+
   const handleSave = async () => {
     setError('')
-    if (!form.name || !form.daily_rate) {
-      setError('Name and daily rate are required')
-      return
-    }
+    if (!form.name || !form.daily_rate) { setError('Name and daily rate are required'); return }
     setSaving(true)
-
-    const { error: err } = await supabase
-      .from('equipment')
-      .update({
-        name: form.name,
-        description: form.description,
-        category: form.category,
-        daily_rate: Number(form.daily_rate),
-        image_url: form.image_url,
-        is_available: form.is_available,
-      })
-      .eq('id', id)
-
-    if (err) {
-      setError(err.message)
-    } else {
-      setSuccess(true)
-      setTimeout(() => router.push('/admin/equipment'), 1500)
-    }
+    const { error: err } = await supabase.from('equipment').update({
+      name: form.name,
+      description: form.description,
+      category: form.category,
+      daily_rate: Number(form.daily_rate),
+      image_url: form.image_url || form.images[0] || '',
+      images: form.images,
+      is_available: form.is_available,
+    }).eq('id', id)
+    if (err) { setError(err.message) }
+    else { setSuccess(true); setTimeout(() => router.push('/admin/equipment'), 1500) }
     setSaving(false)
   }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this equipment? This cannot be undone.')) return
-    const { error: err } = await supabase.from('equipment').delete().eq('id', id)
-    if (err) { setError(err.message); return }
+    if (!confirm('Delete this equipment? This cannot be undone.')) return
+    await supabase.from('equipment').delete().eq('id', id)
     router.push('/admin/equipment')
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
-        Loading equipment...
-      </div>
-    )
-  }
-
   const CATEGORIES = ['excavators', 'cranes', 'forklifts', 'compactors', 'telehandlers', 'compressors']
+
+  if (loading) return <div className="flex items-center justify-center h-64 text-gray-400">Loading...</div>
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Link href="/admin/equipment" className="text-sm text-yellow-600 hover:text-yellow-700 font-medium">
-            ← Back to Equipment
-          </Link>
+          <Link href="/admin/equipment" className="text-sm text-yellow-600 hover:text-yellow-700 font-medium">← Back</Link>
           <h1 className="text-3xl font-bold text-gray-900 mt-2">Edit Equipment</h1>
         </div>
-        <button
-          onClick={handleDelete}
-          className="bg-red-50 hover:bg-red-100 text-red-600 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
-        >
-          🗑️ Delete
-        </button>
+        <button onClick={handleDelete} className="bg-red-50 hover:bg-red-100 text-red-600 font-medium px-4 py-2 rounded-lg text-sm">🗑️ Delete</button>
       </div>
 
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-6 text-sm font-medium">
-          ✅ Equipment updated! Redirecting...
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm">
-          {error}
-        </div>
-      )}
+      {success && <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-6 text-sm font-medium">✅ Saved! Redirecting...</div>}
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm">{error}</div>}
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-5">
 
-        {/* Image preview */}
-        {form.image_url && (
-          <img src={form.image_url} alt="Preview" className="w-full h-48 object-cover rounded-xl" />
-        )}
+        {/* Photo upload section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">Photos</label>
+
+          {/* Existing photos grid */}
+          {form.images.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              {form.images.map((img, i) => (
+                <div key={i} className="relative group aspect-square">
+                  <img src={img} alt={'Photo ' + (i + 1)} className="w-full h-full object-cover rounded-xl" />
+                  {/* Main badge */}
+                  {form.image_url === img && (
+                    <span className="absolute top-1.5 left-1.5 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
+                      Main
+                    </span>
+                  )}
+                  {/* Hover actions */}
+                  <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    {form.image_url !== img && (
+                      <button onClick={() => setMainImage(img)} className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-lg font-medium">
+                        Set Main
+                      </button>
+                    )}
+                    <button onClick={() => removeImage(img)} className="bg-red-500 text-white text-xs px-2 py-1 rounded-lg font-medium">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add more button in grid */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-colors"
+              >
+                <span className="text-2xl">+</span>
+                <span className="text-xs mt-1">Add</span>
+              </button>
+            </div>
+          )}
+
+          {/* Upload drop zone — shown when no images */}
+          {form.images.length === 0 && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-10 flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-colors"
+            >
+              <span className="text-4xl mb-2">📷</span>
+              <p className="font-medium text-sm">Click to upload photos</p>
+              <p className="text-xs mt-1">JPG, PNG, WebP — multiple files supported</p>
+            </button>
+          )}
+
+          {uploading && (
+            <div className="flex items-center gap-2 text-yellow-600 text-sm mt-2">
+              <span className="animate-spin">⏳</span> Uploading...
+            </div>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleUpload}
+            className="hidden"
+          />
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Name *</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={e => setForm({ ...form, name: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          />
+          <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            value={form.description}
-            onChange={e => setForm({ ...form, description: e.target.value })}
-            rows={3}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none"
-          />
+          <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+            rows={3} className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none" />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select
-              value={form.category}
-              onChange={e => setForm({ ...form, category: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            >
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500">
               <option value="">Select category</option>
-              {CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-              ))}
+              {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>)}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Daily Rate (USD) *</label>
-            <input
-              type="number"
-              value={form.daily_rate}
-              onChange={e => setForm({ ...form, daily_rate: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-            />
+            <input type="number" value={form.daily_rate} onChange={e => setForm({ ...form, daily_rate: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500" />
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-          <input
-            type="text"
-            value={form.image_url}
-            onChange={e => setForm({ ...form, image_url: e.target.value })}
-            placeholder="https://..."
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          />
         </div>
 
         <div className="flex items-center justify-between py-2">
@@ -191,19 +246,14 @@ export default function EditEquipmentPage() {
             <p className="text-sm font-medium text-gray-700">Available for Rent</p>
             <p className="text-xs text-gray-400">Toggle to show/hide from catalog</p>
           </div>
-          <button
-            onClick={() => setForm({ ...form, is_available: !form.is_available })}
-            className={'w-12 h-6 rounded-full transition-colors ' + (form.is_available ? 'bg-yellow-500' : 'bg-gray-200')}
-          >
+          <button onClick={() => setForm({ ...form, is_available: !form.is_available })}
+            className={'w-12 h-6 rounded-full transition-colors ' + (form.is_available ? 'bg-yellow-500' : 'bg-gray-200')}>
             <span className={'block w-5 h-5 rounded-full bg-white shadow transform transition-transform mx-0.5 ' + (form.is_available ? 'translate-x-6' : 'translate-x-0')} />
           </button>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="w-full bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-200 text-white font-semibold py-3 rounded-xl transition-colors"
-        >
+        <button onClick={handleSave} disabled={saving}
+          className="w-full bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-200 text-white font-semibold py-3 rounded-xl transition-colors">
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>

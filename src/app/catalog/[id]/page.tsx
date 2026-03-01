@@ -4,6 +4,7 @@ import Link from 'next/link'
 import BookingForm from '@/components/ui/BookingForm'
 import ReviewForm from '@/components/ui/ReviewForm'
 import ReviewsList from '@/components/ui/ReviewsList'
+import ImageGallery from '@/components/ui/ImageGallery'
 
 export default async function EquipmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,6 +24,7 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
     .order('created_at', { ascending: false })
 
   const specs = equipment.specs || {}
+  const images = equipment.images?.length > 0 ? equipment.images : [equipment.image_url]
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -31,11 +33,11 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
         <div className="lg:col-span-2">
-          <img src={equipment.image_url} alt={equipment.name} className="w-full h-80 object-cover rounded-2xl mb-6" />
 
-          <div className="flex items-center gap-3 mb-3">
+          <ImageGallery images={images} name={equipment.name} />
+
+          <div className="flex items-center gap-3 mb-3 mt-6">
             <span className="text-sm font-medium text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full capitalize">
               {equipment.category}
             </span>
@@ -86,7 +88,6 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
             )}
           </div>
         </div>
-
       </div>
     </div>
   )
