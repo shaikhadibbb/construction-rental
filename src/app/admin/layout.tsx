@@ -13,17 +13,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
-
-      if (!profile || profile.role !== 'admin') {
-        router.push('/')
-        return
-      }
+      if (!profile || profile.role !== 'admin') { router.push('/'); return }
       setChecking(false)
     }
     checkAdmin()
@@ -40,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <span className="text-xl font-bold text-yellow-500">⚙️ Admin Panel</span>
           <nav className="flex gap-6 text-sm">
             <Link href="/admin" className="text-gray-300 hover:text-white transition-colors">
@@ -51,6 +46,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
             <Link href="/admin/bookings" className="text-gray-300 hover:text-white transition-colors">
               Bookings
+            </Link>
+            <Link href="/admin/analytics" className="text-gray-300 hover:text-white transition-colors">
+              Analytics
             </Link>
           </nav>
         </div>
