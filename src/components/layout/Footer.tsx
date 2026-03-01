@@ -41,6 +41,7 @@ export default function Footer() {
               <p className="text-gray-500">Deployed on Vercel</p>
               <Link href="/contact" className="block hover:text-white transition-colors">Contact Us</Link>
               <Link href="/faq" className="block hover:text-white transition-colors">FAQ</Link>
+              <Link href="/about" className="block hover:text-white transition-colors">About Us</Link>
             </div>
           </div>
 
