@@ -1,10 +1,10 @@
 import { supabase } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import BookingForm from '@/components/ui/BookingForm'
 import ReviewForm from '@/components/ui/ReviewForm'
 import ReviewsList from '@/components/ui/ReviewsList'
 import ImageGallery from '@/components/ui/ImageGallery'
+import QuoteForm from '@/components/ui/QuoteForm'
 
 export default async function EquipmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -72,14 +72,11 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
           </div>
         </div>
 
+        {/* Quote form panel */}
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-24">
-            <div className="mb-4">
-              <span className="text-3xl font-bold text-gray-900">${equipment.daily_rate}</span>
-              <span className="text-gray-400 text-sm">/day</span>
-            </div>
             {equipment.is_available ? (
-              <BookingForm equipment={{ id: equipment.id, name: equipment.name, daily_rate: equipment.daily_rate }} />
+              <QuoteForm equipmentName={equipment.name} />
             ) : (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
                 <p className="text-red-600 font-medium">Currently Unavailable</p>

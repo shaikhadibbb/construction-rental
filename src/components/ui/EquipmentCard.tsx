@@ -37,13 +37,9 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
         <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1">
           {equipment.description}
         </p>
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-          <div>
-            <span className="text-xl font-bold text-gray-900">${equipment.daily_rate}</span>
-            <span className="text-gray-400 text-sm">/day</span>
-          </div>
+        <div className="mt-4 pt-4 border-t border-gray-100">
           <span className="text-sm font-semibold text-yellow-600 group-hover:text-yellow-700">
-            Rent Now →
+            Request a Quote →
           </span>
         </div>
       </div>
