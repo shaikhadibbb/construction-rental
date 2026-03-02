@@ -1,5 +1,6 @@
 'use client'
 
+import { deleteEquipment, saveEquipment } from '../actions'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -18,13 +19,8 @@ export default function EditEquipmentPage() {
   const [success, setSuccess] = useState(false)
 
   const [form, setForm] = useState({
-    name: '',
-    description: '',
-    category: '',
-    daily_rate: '',
-    image_url: '',
-    images: [] as string[],
-    is_available: true,
+    name: '', description: '', category: '', daily_rate: '',
+    image_url: '', images: [] as string[], is_available: true,
   })
 
   useEffect(() => {
@@ -50,60 +46,32 @@ export default function EditEquipmentPage() {
     const files = e.target.files
     if (!files || files.length === 0) return
     setUploading(true)
-
     const uploadedUrls: string[] = []
-
     for (const file of Array.from(files)) {
       const ext = file.name.split('.').pop()
       const fileName = `${id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('equipment-images')
-        .upload(fileName, file, { upsert: true })
-
-      if (uploadError) {
-        setError('Upload failed: ' + uploadError.message)
-        continue
-      }
-
-      const { data: urlData } = supabase.storage
-        .from('equipment-images')
-        .getPublicUrl(fileName)
-
+      const { error: uploadError } = await supabase.storage.from('equipment-images').upload(fileName, file, { upsert: true })
+      if (uploadError) { setError('Upload failed: ' + uploadError.message); continue }
+      const { data: urlData } = supabase.storage.from('equipment-images').getPublicUrl(fileName)
       uploadedUrls.push(urlData.publicUrl)
     }
-
     if (uploadedUrls.length > 0) {
-      const allImages = [...form.images, ...uploadedUrls]
       setForm(prev => ({
         ...prev,
-        images: allImages,
+        images: [...prev.images, ...uploadedUrls],
         image_url: prev.image_url || uploadedUrls[0],
       }))
     }
-
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const removeImage = async (url: string) => {
-    const updated = form.images.filter(img => img !== url)
-    setForm(prev => ({
-      ...prev,
-      images: updated,
-      image_url: prev.image_url === url ? (updated[0] || '') : prev.image_url,
-    }))
-  }
-
-  const setMainImage = (url: string) => {
-    setForm(prev => ({ ...prev, image_url: url }))
-  }
-
   const handleSave = async () => {
-    setError('')
-    if (!form.name || !form.daily_rate) { setError('Name and daily rate are required'); return }
-    setSaving(true)
-    const { error: err } = await supabase.from('equipment').update({
+  setError('')
+  if (!form.name || !form.daily_rate) { setError('Name and daily rate are required'); return }
+  setSaving(true)
+  try {
+    await saveEquipment(id, {
       name: form.name,
       description: form.description,
       category: form.category,
@@ -111,17 +79,24 @@ export default function EditEquipmentPage() {
       image_url: form.image_url || form.images[0] || '',
       images: form.images,
       is_available: form.is_available,
-    }).eq('id', id)
-    if (err) { setError(err.message) }
-    else { setSuccess(true); setTimeout(() => router.push('/admin/equipment'), 1500) }
-    setSaving(false)
+    })
+    setSuccess(true)
+    setTimeout(() => { window.location.href = '/admin/equipment' }, 1500)
+  } catch (err: any) {
+    setError(err.message)
   }
+  setSaving(false)
+}
 
   const handleDelete = async () => {
-    if (!confirm('Delete this equipment? This cannot be undone.')) return
-    await supabase.from('equipment').delete().eq('id', id)
-    router.push('/admin/equipment')
+  if (!confirm('Delete this equipment? This cannot be undone.')) return
+  try {
+    await deleteEquipment(id)
+    window.location.href = '/admin/equipment'  // ← change this line
+  } catch (err: any) {
+    setError(err.message)
   }
+}
 
   const CATEGORIES = ['excavators', 'cranes', 'forklifts', 'compactors', 'telehandlers', 'compressors']
 
@@ -142,75 +117,48 @@ export default function EditEquipmentPage() {
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-5">
 
-        {/* Photo upload section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">Photos</label>
-
-          {/* Existing photos grid */}
-          {form.images.length > 0 && (
+          {form.images.length > 0 ? (
             <div className="grid grid-cols-3 gap-3 mb-3">
               {form.images.map((img, i) => (
                 <div key={i} className="relative group aspect-square">
-                  <img src={img} alt={'Photo ' + (i + 1)} className="w-full h-full object-cover rounded-xl" />
-                  {/* Main badge */}
-                  {form.image_url === img && (
-                    <span className="absolute top-1.5 left-1.5 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">
-                      Main
-                    </span>
+                  {img ? (
+                    <img src={img} alt={'Photo ' + (i + 1)} className="w-full h-full object-cover rounded-xl" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-xs">No image</div>
                   )}
-                  {/* Hover actions */}
+                  {form.image_url === img && (
+                    <span className="absolute top-1.5 left-1.5 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium">Main</span>
+                  )}
                   <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     {form.image_url !== img && (
-                      <button onClick={() => setMainImage(img)} className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-lg font-medium">
-                        Set Main
-                      </button>
+                      <button onClick={() => setForm(p => ({ ...p, image_url: img }))} className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-lg font-medium">Set Main</button>
                     )}
-                    <button onClick={() => removeImage(img)} className="bg-red-500 text-white text-xs px-2 py-1 rounded-lg font-medium">
-                      Remove
-                    </button>
+                    <button onClick={() => setForm(p => ({ ...p, images: p.images.filter(u => u !== img), image_url: p.image_url === img ? (p.images.filter(u => u !== img)[0] || '') : p.image_url }))} className="bg-red-500 text-white text-xs px-2 py-1 rounded-lg font-medium">Remove</button>
                   </div>
                 </div>
               ))}
-
-              {/* Add more button in grid */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-colors"
-              >
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-colors">
                 <span className="text-2xl">+</span>
                 <span className="text-xs mt-1">Add</span>
               </button>
             </div>
-          )}
-
-          {/* Upload drop zone — shown when no images */}
-          {form.images.length === 0 && (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-10 flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-colors"
-            >
+          ) : (
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              className="w-full border-2 border-dashed border-gray-300 rounded-xl py-10 flex flex-col items-center justify-center text-gray-400 hover:border-yellow-400 hover:text-yellow-500 transition-colors">
               <span className="text-4xl mb-2">📷</span>
               <p className="font-medium text-sm">Click to upload photos</p>
               <p className="text-xs mt-1">JPG, PNG, WebP — multiple files supported</p>
             </button>
           )}
-
           {uploading && (
             <div className="flex items-center gap-2 text-yellow-600 text-sm mt-2">
               <span className="animate-spin">⏳</span> Uploading...
             </div>
           )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleUpload}
-            className="hidden"
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
         </div>
 
         <div>
