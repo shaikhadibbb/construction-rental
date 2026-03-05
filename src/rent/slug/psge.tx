@@ -1,0 +1,404 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+const BASE_URL = 'https://constructionrental.vercel.app'
+
+// ── SEO page data ─────────────────────────────────────────────
+const SEO_PAGES: Record<string, {
+  title: string
+  h1: string
+  description: string
+  location: string
+  equipment: string
+  category: string
+  keywords: string[]
+  faqs: { q: string; a: string }[]
+}> = {
+  'excavator-rental-mumbai': {
+    title: 'Excavator Rental in Mumbai — Hire JCB & Hydraulic Excavators',
+    h1: 'Excavator Rental in Mumbai',
+    description: 'Rent excavators in Mumbai from ₹X/day. Hydraulic excavators, JCB, mini excavators available for construction projects across Mumbai. Fast delivery, 2hr quote response.',
+    location: 'Mumbai',
+    equipment: 'Excavator',
+    category: 'excavators',
+    keywords: ['excavator rental mumbai', 'jcb hire mumbai', 'hydraulic excavator mumbai', 'excavator on rent mumbai'],
+    faqs: [
+      { q: 'How much does excavator rental cost in Mumbai?', a: 'Excavator rental in Mumbai typically starts from ₹8,000–₹15,000 per day depending on machine size and type. Contact us for an exact quote for your project.' },
+      { q: 'Do you deliver excavators to construction sites in Mumbai?', a: 'Yes, we deliver to all areas across Mumbai including Andheri, Bandra, Thane, Navi Mumbai, and surrounding areas.' },
+      { q: 'How quickly can I get an excavator on site in Mumbai?', a: 'We can typically arrange delivery within 24–48 hours. Submit a quote request and our team will confirm availability within 2 hours.' },
+    ],
+  },
+  'excavator-rental-ahmedabad': {
+    title: 'Excavator Rental in Ahmedabad — JCB & Excavator Hire',
+    h1: 'Excavator Rental in Ahmedabad',
+    description: 'Hire excavators in Ahmedabad for construction, demolition, and earthmoving projects. Fast delivery across Ahmedabad. Get a quote in minutes.',
+    location: 'Ahmedabad',
+    equipment: 'Excavator',
+    category: 'excavators',
+    keywords: ['excavator rental ahmedabad', 'jcb hire ahmedabad', 'excavator on rent ahmedabad', 'earth mover rental ahmedabad'],
+    faqs: [
+      { q: 'Can I rent an excavator in Ahmedabad for a single day?', a: 'Yes, we offer daily, weekly, and monthly rental options for excavators in Ahmedabad.' },
+      { q: 'What types of excavators are available in Ahmedabad?', a: 'We offer hydraulic excavators, mini excavators, and crawler excavators depending on your project requirements.' },
+      { q: 'Do you provide an operator with the excavator in Ahmedabad?', a: 'Operators can be arranged at an additional cost. Contact us to discuss your requirements.' },
+    ],
+  },
+  'excavator-rental-gujarat': {
+    title: 'Excavator Rental in Gujarat — Hire Excavators Across Gujarat',
+    h1: 'Excavator Rental in Gujarat',
+    description: 'Professional excavator rental across Gujarat — Ahmedabad, Surat, Vadodara, Rajkot and more. Trusted by 200+ contractors. Get a quote today.',
+    location: 'Gujarat',
+    equipment: 'Excavator',
+    category: 'excavators',
+    keywords: ['excavator rental gujarat', 'excavator hire gujarat', 'jcb rental gujarat', 'construction equipment rental gujarat'],
+    faqs: [
+      { q: 'Do you rent excavators across all of Gujarat?', a: 'Yes, we serve all major cities in Gujarat including Ahmedabad, Surat, Vadodara, Rajkot, Gandhinagar and surrounding areas.' },
+      { q: 'What is the minimum rental period for an excavator in Gujarat?', a: 'Our minimum rental period is 1 day. We also offer weekly and monthly rates with discounts.' },
+      { q: 'How do I book an excavator in Gujarat?', a: 'Simply browse our catalog, select the excavator you need, and submit a quote request. Our team responds within 2 hours.' },
+    ],
+  },
+  'crane-rental-mumbai': {
+    title: 'Crane Rental in Mumbai — Mobile & Tower Crane Hire',
+    h1: 'Crane Rental in Mumbai',
+    description: 'Hire cranes in Mumbai for construction projects. Mobile cranes, tower cranes, and mini cranes available. Serving all of Mumbai with fast delivery and 2hr quote response.',
+    location: 'Mumbai',
+    equipment: 'Crane',
+    category: 'cranes',
+    keywords: ['crane rental mumbai', 'mobile crane hire mumbai', 'tower crane mumbai', 'crane on rent mumbai'],
+    faqs: [
+      { q: 'What types of cranes can I rent in Mumbai?', a: 'We offer mobile cranes, tower cranes, and pick-and-carry cranes for projects of all sizes across Mumbai.' },
+      { q: 'Do I need permits to use a crane in Mumbai?', a: 'Yes, certain crane operations require municipal permits. We can advise you on requirements for your specific project.' },
+      { q: 'How much does crane rental cost in Mumbai?', a: 'Crane rental in Mumbai varies by type and duration. Contact us for a customised quote for your project.' },
+    ],
+  },
+  'crane-rental-gujarat': {
+    title: 'Crane Rental in Gujarat — Mobile Crane Hire Across Gujarat',
+    h1: 'Crane Rental in Gujarat',
+    description: 'Professional crane rental across Gujarat for construction, infrastructure, and industrial projects. Available in Ahmedabad, Surat, Vadodara and more.',
+    location: 'Gujarat',
+    equipment: 'Crane',
+    category: 'cranes',
+    keywords: ['crane rental gujarat', 'mobile crane gujarat', 'crane hire gujarat', 'crane on rent gujarat'],
+    faqs: [
+      { q: 'Can you deliver cranes to project sites across Gujarat?', a: 'Yes, we deliver to all major cities and project sites across Gujarat with prior arrangement.' },
+      { q: 'What is the lead time for crane rental in Gujarat?', a: 'We typically arrange delivery within 48–72 hours. Submit your request and we will confirm availability quickly.' },
+      { q: 'Do you offer long-term crane rental in Gujarat?', a: 'Yes, we offer monthly rates with significant discounts for long-term projects.' },
+    ],
+  },
+  'forklift-rental-mumbai': {
+    title: 'Forklift Rental in Mumbai — Electric & Diesel Forklifts for Hire',
+    h1: 'Forklift Rental in Mumbai',
+    description: 'Rent forklifts in Mumbai for warehouses, construction sites, and industrial use. Electric and diesel forklifts available. Fast delivery across Mumbai.',
+    location: 'Mumbai',
+    equipment: 'Forklift',
+    category: 'forklifts',
+    keywords: ['forklift rental mumbai', 'forklift hire mumbai', 'electric forklift mumbai', 'forklift on rent mumbai'],
+    faqs: [
+      { q: 'What forklift capacities are available in Mumbai?', a: 'We have forklifts ranging from 1.5 tonne to 10 tonne capacity available for rent in Mumbai.' },
+      { q: 'Can I rent a forklift for a warehouse in Mumbai?', a: 'Yes, we supply forklifts for warehouses, factories, and construction sites across Mumbai and Navi Mumbai.' },
+      { q: 'Do you provide forklift operators in Mumbai?', a: 'Certified forklift operators can be arranged at an additional cost. Contact us to discuss your requirements.' },
+    ],
+  },
+  'jcb-rental-near-me': {
+    title: 'JCB Rental Near Me — JCB on Rent Across India',
+    h1: 'JCB Rental Near You',
+    description: 'Find JCB machines for rent near you. We serve Mumbai, Ahmedabad, Surat, Gujarat and surrounding areas. Get a JCB quote within 2 hours.',
+    location: 'India',
+    equipment: 'JCB / Excavator',
+    category: 'excavators',
+    keywords: ['jcb rental near me', 'jcb on rent', 'jcb hire near me', 'jcb machine rent'],
+    faqs: [
+      { q: 'How do I find a JCB for rent near me?', a: 'Browse our catalog or contact us directly. We serve Mumbai, Ahmedabad, Surat, and all of Gujarat. Submit your location and we will confirm availability.' },
+      { q: 'How much does it cost to rent a JCB?', a: 'JCB rental typically starts from ₹6,000–₹12,000 per day. Prices vary by machine type and rental duration.' },
+      { q: 'Can I rent a JCB for just one day?', a: 'Yes, we offer daily rental with no minimum commitment beyond one day. Contact us for same-day availability.' },
+    ],
+  },
+  'construction-equipment-rental-mumbai': {
+    title: 'Construction Equipment Rental in Mumbai — Hire Machines Online',
+    h1: 'Construction Equipment Rental in Mumbai',
+    description: 'Rent construction equipment in Mumbai — excavators, cranes, forklifts, compactors and more. 50+ machines available. Trusted by 200+ contractors. Get a quote in minutes.',
+    location: 'Mumbai',
+    equipment: 'All Equipment',
+    category: '',
+    keywords: ['construction equipment rental mumbai', 'equipment hire mumbai', 'machinery rental mumbai', 'construction machinery mumbai'],
+    faqs: [
+      { q: 'What construction equipment can I rent in Mumbai?', a: 'We offer excavators, cranes, forklifts, compactors, telehandlers, compressors and more across Mumbai.' },
+      { q: 'How do I rent construction equipment in Mumbai?', a: 'Browse our catalog online, select the equipment you need, and submit a quote request. Our team responds within 2 hours with pricing.' },
+      { q: 'Is the equipment insured?', a: 'Yes, all equipment on ConstructRent is fully insured and undergoes a 50-point inspection before every rental.' },
+    ],
+  },
+  'construction-equipment-rental-gujarat': {
+    title: 'Construction Equipment Rental in Gujarat — Hire Machines Across Gujarat',
+    h1: 'Construction Equipment Rental in Gujarat',
+    description: 'Professional construction equipment rental across Gujarat. Serving Ahmedabad, Surat, Vadodara, Rajkot and more. 50+ machines, fast quotes, on-site delivery.',
+    location: 'Gujarat',
+    equipment: 'All Equipment',
+    category: '',
+    keywords: ['construction equipment rental gujarat', 'equipment hire gujarat', 'machinery rental gujarat', 'construction machinery gujarat'],
+    faqs: [
+      { q: 'Which cities in Gujarat do you serve?', a: 'We serve all major cities in Gujarat including Ahmedabad, Surat, Vadodara, Rajkot, Gandhinagar, Anand, and surrounding areas.' },
+      { q: 'How quickly can I get equipment delivered in Gujarat?', a: 'We typically deliver within 24–72 hours depending on your location. Submit a quote and we will confirm timing.' },
+      { q: 'Do you offer long-term equipment rental in Gujarat?', a: 'Yes, we offer weekly and monthly rates with discounts of 10–20% for longer rentals.' },
+    ],
+  },
+  'compactor-rental-mumbai': {
+    title: 'Compactor Rental in Mumbai — Plate & Roller Compactors for Hire',
+    h1: 'Compactor Rental in Mumbai',
+    description: 'Rent compactors in Mumbai for road construction, landscaping, and site preparation. Plate compactors and roller compactors available. Fast delivery across Mumbai.',
+    location: 'Mumbai',
+    equipment: 'Compactor',
+    category: 'compactors',
+    keywords: ['compactor rental mumbai', 'plate compactor hire mumbai', 'roller compactor mumbai', 'road roller rental mumbai'],
+    faqs: [
+      { q: 'What types of compactors are available in Mumbai?', a: 'We offer plate compactors, single drum rollers, and double drum rollers for road and site compaction work in Mumbai.' },
+      { q: 'How much does compactor rental cost in Mumbai?', a: 'Compactor rental starts from ₹3,000–₹8,000 per day depending on type and size. Contact us for a quote.' },
+      { q: 'Can I rent a compactor for road construction in Mumbai?', a: 'Yes, we regularly supply compactors for road construction, MHADA projects, and municipal works across Mumbai.' },
+    ],
+  },
+}
+
+// ── generateStaticParams ──────────────────────────────────────
+export async function generateStaticParams() {
+  return Object.keys(SEO_PAGES).map(slug => ({ slug }))
+}
+
+// ── generateMetadata ──────────────────────────────────────────
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const page = SEO_PAGES[params.slug]
+  if (!page) return { title: 'Not Found' }
+  return {
+    title: page.title,
+    description: page.description,
+    keywords: page.keywords,
+    openGraph: {
+      title: page.title,
+      description: page.description,
+      url: `${BASE_URL}/rent/${params.slug}`,
+      type: 'website',
+    },
+    alternates: {
+      canonical: `${BASE_URL}/rent/${params.slug}`,
+    },
+  }
+}
+
+// ── Page component ────────────────────────────────────────────
+export default async function SEOLandingPage({ params }: { params: { slug: string } }) {
+  const page = SEO_PAGES[params.slug]
+  if (!page) notFound()
+
+  // Fetch relevant equipment
+  const query = supabase.from('equipment').select('*').eq('is_available', true)
+  if (page.category) query.eq('category', page.category)
+  const { data: equipment } = await query.limit(6)
+
+  const TRUST = [
+    { icon: '✅', label: '50-Point Inspection', desc: 'Every machine checked before delivery' },
+    { icon: '⚡', label: '2hr Quote Response', desc: 'Fast turnaround on all enquiries' },
+    { icon: '🚚', label: 'On-Site Delivery', desc: `Delivered to your site in ${page.location}` },
+    { icon: '🔒', label: 'Fully Insured', desc: 'All equipment covered' },
+  ]
+
+  return (
+    <div className="bg-white">
+
+      {/* Hero */}
+      <section className="bg-[#0a1628] relative overflow-hidden py-20 px-4">
+        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px)'}} />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-yellow-500/5 rounded-full blur-3xl" />
+        <div className="relative max-w-4xl mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-gray-500 text-sm mb-6">
+            <Link href="/" className="hover:text-yellow-400 transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/catalog" className="hover:text-yellow-400 transition-colors">Equipment</Link>
+            <span>/</span>
+            <span className="text-gray-400">{page.location}</span>
+          </div>
+
+          <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full px-4 py-2 mb-6">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-yellow-400 text-sm font-semibold tracking-wide">AVAILABLE IN {page.location.toUpperCase()}</span>
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 leading-tight">{page.h1}</h1>
+          <p className="text-gray-400 text-lg max-w-2xl leading-relaxed mb-8">{page.description}</p>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/catalog"
+              className="inline-flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-8 py-4 rounded-xl transition-all hover:scale-105">
+              Browse Equipment →
+            </Link>
+            <Link href="/contact"
+              className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-xl transition-colors">
+              Get a Free Quote
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust bar */}
+      <section className="bg-yellow-500 py-8 px-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {TRUST.map(item => (
+            <div key={item.label} className="flex items-center gap-3">
+              <span className="text-2xl flex-shrink-0">{item.icon}</span>
+              <div>
+                <p className="font-black text-[#0a1628] text-sm">{item.label}</p>
+                <p className="text-[#0a1628]/60 text-xs">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Available equipment */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-10">
+            <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-2">Available Now</p>
+            <h2 className="text-3xl font-black text-[#0a1628]">
+              {page.category ? `${page.equipment}s Available in ${page.location}` : `Equipment Available in ${page.location}`}
+            </h2>
+            <p className="text-gray-500 mt-2">All machines inspected, insured, and ready to deploy</p>
+          </div>
+
+          {equipment && equipment.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {equipment.map(item => (
+                <Link key={item.id} href={`/catalog/${item.id}`}
+                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-yellow-200 transition-all group">
+                  <div className="aspect-video bg-gray-100 overflow-hidden">
+                    {item.image_url
+                      ? <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      : <div className="w-full h-full flex items-center justify-center text-4xl">🚧</div>
+                    }
+                  </div>
+                  <div className="p-5">
+                    <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full capitalize">{item.category}</span>
+                    <h3 className="font-black text-[#0a1628] mt-2 mb-1">{item.name}</h3>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-sm text-gray-500">Starting from <strong className="text-[#0a1628]">${item.daily_rate}/day</strong></span>
+                      <span className="text-xs font-bold text-yellow-600 group-hover:translate-x-1 transition-transform inline-block">View →</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-2xl p-12 text-center">
+              <p className="text-3xl mb-3">🚧</p>
+              <p className="font-bold text-gray-700 mb-2">Equipment available on request</p>
+              <p className="text-gray-400 text-sm mb-6">Contact us for current availability in {page.location}</p>
+              <Link href="/contact" className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-6 py-3 rounded-xl transition-colors text-sm">
+                Contact Us →
+              </Link>
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Link href="/catalog" className="inline-flex items-center gap-2 text-yellow-600 font-bold hover:text-yellow-700 text-sm">
+              View full catalog →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Why us */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-3">Why Choose Us</p>
+            <h2 className="text-3xl font-black text-[#0a1628]">Why Contractors in {page.location} Choose ConstructRent</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: '⚡', title: 'Quote in 2 Hours', desc: 'Submit your request online and get a confirmed quote from our team within 2 hours — no waiting, no back and forth.' },
+              { icon: '🚚', title: `Delivery to ${page.location}`, desc: `We deliver directly to your construction site anywhere in ${page.location}. No pickup needed.` },
+              { icon: '🔒', title: 'Insured & Inspected', desc: 'Every machine undergoes a 50-point inspection and is fully insured before it arrives on your site.' },
+              { icon: '💰', title: 'Transparent Pricing', desc: 'No hidden charges. The daily rate you see includes the machine — no surprise invoices.' },
+              { icon: '📞', title: '24/7 Support', desc: 'Equipment issues on site? Call us any time. We resolve breakdowns or arrange replacements fast.' },
+              { icon: '👷', title: 'Trusted by 200+ Contractors', desc: 'Contractors from L&T, Shapoorji Pallonji, and hundreds of independent builders trust ConstructRent.' },
+            ].map(item => (
+              <div key={item.title} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-yellow-200 hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center text-xl mb-3">{item.icon}</div>
+                <h3 className="font-black text-[#0a1628] text-sm mb-1">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ — structured data for Google */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-3">FAQ</p>
+            <h2 className="text-3xl font-black text-[#0a1628]">Common Questions About {page.h1}</h2>
+          </div>
+          <div className="space-y-4">
+            {page.faqs.map(faq => (
+              <div key={faq.q} className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-yellow-200 transition-colors">
+                <h3 className="font-black text-[#0a1628] mb-2 text-sm">{faq.q}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Internal links to other cities — helps SEO */}
+      <section className="py-12 px-4 bg-gray-50 border-t border-gray-200">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Also Available In</p>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(SEO_PAGES)
+              .filter(([slug]) => slug !== params.slug)
+              .slice(0, 8)
+              .map(([slug, data]) => (
+                <Link key={slug} href={`/rent/${slug}`}
+                  className="text-sm text-yellow-600 hover:text-yellow-700 bg-white border border-gray-200 hover:border-yellow-200 px-4 py-2 rounded-full transition-colors font-medium">
+                  {data.equipment} in {data.location}
+                </Link>
+              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-4 bg-[#0a1628] relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[250px] bg-yellow-500/5 rounded-full blur-3xl" />
+        <div className="relative max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-black text-white mb-3">Ready to Rent in {page.location}?</h2>
+          <p className="text-gray-400 mb-8">Get a free quote within 2 hours. No commitment required.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/catalog" className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-8 py-4 rounded-xl transition-all hover:scale-105">
+              Browse Equipment →
+            </Link>
+            <Link href="/contact" className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-xl transition-colors">
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* JSON-LD structured data for Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: page.faqs.map(faq => ({
+              '@type': 'Question',
+              name: faq.q,
+              acceptedAnswer: { '@type': 'Answer', text: faq.a },
+            })),
+          }),
+        }}
+      />
+    </div>
+  )
+}
