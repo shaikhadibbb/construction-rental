@@ -6,6 +6,14 @@ import ReviewsList from '@/components/ui/ReviewsList'
 import ImageGallery from '@/components/ui/ImageGallery'
 import QuoteForm from '@/components/ui/QuoteForm'
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const { data } = await supabase.from('equipment').select('name, category, daily_rate').eq('id', params.id).single()
+  if (!data) return { title: 'Equipment Not Found' }
+  return {
+    title: data.name,
+    description: `Rent a ${data.name} (${data.category}) from $${data.daily_rate}/day. Available across India with fast delivery.`,
+  }
+}
 export default async function EquipmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 

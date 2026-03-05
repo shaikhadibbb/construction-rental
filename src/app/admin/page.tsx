@@ -1,145 +1,160 @@
-export const revalidate = 0
+'use client'
 
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-export default async function AdminPage() {
-  const { data: equipment } = await supabase.from('equipment').select('id, is_available, category')
-  const { data: bookings } = await supabase.from('bookings').select('id, status, total_amount, created_at, customer_name, equipment_name')
-  const { count: totalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+export default function AdminEquipmentPage() {
+  const [equipment, setEquipment] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [toggling, setToggling] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
-  const totalEquipment = equipment?.length || 0
-  const availableEquipment = equipment?.filter(e => e.is_available).length || 0
-  const totalBookings = bookings?.length || 0
-  const pendingBookings = bookings?.filter(b => b.status === 'pending').length || 0
-  const confirmedBookings = bookings?.filter(b => b.status === 'confirmed').length || 0
-  const totalRevenue = bookings?.filter(b => b.status !== 'cancelled')
-    .reduce((sum, b) => sum + Number(b.total_amount || 0), 0) || 0
-
-  const recentBookings = (bookings || [])
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5)
-
-  const STATUS_STYLES: Record<string, string> = {
-    pending: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
-    confirmed: 'bg-green-50 text-green-700 border border-green-200',
-    cancelled: 'bg-red-50 text-red-600 border border-red-200',
-    completed: 'bg-gray-100 text-gray-600 border border-gray-200',
+  const fetchEquipment = async () => {
+    const { data } = await supabase.from('equipment').select('*').order('created_at')
+    setEquipment(data || [])
+    setLoading(false)
   }
+
+  useEffect(() => { fetchEquipment() }, [])
+
+  const handleToggle = async (id: string, current: boolean) => {
+    setToggling(id)
+    await supabase.from('equipment').update({ is_available: !current }).eq('id', id)
+    await fetchEquipment()
+    setToggling(null)
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    setDeleting(id)
+    await supabase.from('equipment').delete().eq('id', id)
+    await fetchEquipment()
+    setDeleting(null)
+  }
+
+  const filtered = equipment.filter(item =>
+    item.name.toLowerCase().includes(search.toLowerCase()) ||
+    item.category.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const available = equipment.filter(e => e.is_available).length
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-gray-400 text-sm">Loading equipment...</p>
+      </div>
+    </div>
+  )
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-1">Admin Panel</p>
-          <h1 className="text-3xl font-black text-gray-900">Overview</h1>
+          <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-1">Fleet</p>
+          <h1 className="text-3xl font-black text-gray-900">Equipment</h1>
+          <p className="text-gray-400 text-sm mt-0.5">{available} available · {equipment.length} total</p>
         </div>
         <Link href="/admin/equipment/new"
-          className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-5 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2">
-          + Add Equipment
+          className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-5 py-2.5 rounded-xl transition-colors text-sm">
+          + Add New
         </Link>
       </div>
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: 'Total Equipment', value: totalEquipment, sub: availableEquipment + ' available', icon: '🚧', href: '/admin/equipment', accent: 'border-blue-200 bg-blue-50', val: 'text-blue-700' },
-          { label: 'Total Bookings', value: totalBookings, sub: pendingBookings + ' pending review', icon: '📋', href: '/admin/bookings', accent: 'border-yellow-200 bg-yellow-50', val: 'text-yellow-700' },
-          { label: 'Total Revenue', value: '$' + totalRevenue.toLocaleString(), sub: 'from confirmed bookings', icon: '💰', href: '/admin/bookings', accent: 'border-green-200 bg-green-50', val: 'text-green-700' },
-          { label: 'Customers', value: totalUsers || 0, sub: 'registered accounts', icon: '👷', href: '/admin/bookings', accent: 'border-purple-200 bg-purple-50', val: 'text-purple-700' },
-        ].map(stat => (
-          <Link key={stat.label} href={stat.href}
-            className={`rounded-2xl border p-5 hover:shadow-md transition-all hover:-translate-y-0.5 ${stat.accent}`}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl">{stat.icon}</span>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-            <p className={`text-3xl font-black ${stat.val}`}>{stat.value}</p>
-            <p className="text-gray-700 font-semibold text-sm mt-1">{stat.label}</p>
-            <p className="text-gray-400 text-xs mt-0.5">{stat.sub}</p>
-          </Link>
-        ))}
+      <div className="relative mb-6">
+        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name or category..."
+          className="w-full bg-white border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 shadow-sm" />
+        {search && (
+          <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        )}
       </div>
 
-      {/* Status row */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {[
-          { label: 'Pending Review', value: pendingBookings, color: 'bg-yellow-500', note: 'Need action' },
-          { label: 'Confirmed', value: confirmedBookings, color: 'bg-green-500', note: 'Active rentals' },
-          { label: 'Unavailable', value: totalEquipment - availableEquipment, color: 'bg-red-400', note: 'Equipment offline' },
-        ].map(item => (
-          <div key={item.label} className="bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4">
-            <div className={`w-10 h-10 ${item.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-              <span className="text-white font-black text-lg">{item.value}</span>
-            </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">{item.label}</p>
-              <p className="text-gray-400 text-xs">{item.note}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Recent bookings */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="font-black text-[#0a1628]">Recent Bookings</h2>
-            <Link href="/admin/bookings" className="text-xs font-semibold text-yellow-600 hover:text-yellow-700">View all →</Link>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {recentBookings.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                <p className="text-3xl mb-2">📋</p>
-                <p className="text-sm">No bookings yet</p>
-              </div>
-            ) : recentBookings.map(booking => (
-              <div key={booking.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#0a1628] rounded-lg flex items-center justify-center text-yellow-500 font-black text-sm flex-shrink-0">
-                    {(booking.customer_name || '?')[0].toUpperCase()}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Equipment</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Category</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider hidden md:table-cell">Rate</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-16 text-center text-gray-400">
+                  <p className="text-3xl mb-2">🔍</p>
+                  <p className="font-medium">No equipment found</p>
+                </td>
+              </tr>
+            ) : filtered.map(item => (
+              <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                      {item.image_url
+                        ? <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-lg">🚧</div>
+                      }
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm">{item.name}</p>
+                      <p className="text-xs text-gray-400 capitalize sm:hidden">{item.category}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">{booking.customer_name || 'Unknown'}</p>
-                    <p className="text-xs text-gray-400 truncate max-w-[180px]">{booking.equipment_name || 'Equipment'}</p>
+                </td>
+                <td className="px-6 py-4 hidden sm:table-cell">
+                  <span className="text-xs font-bold text-yellow-600 bg-yellow-50 border border-yellow-100 px-2.5 py-1 rounded-full capitalize">
+                    {item.category}
+                  </span>
+                </td>
+                <td className="px-6 py-4 hidden md:table-cell">
+                  <span className="text-sm font-black text-[#0a1628]">${item.daily_rate}</span>
+                  <span className="text-xs text-gray-400">/day</span>
+                </td>
+                <td className="px-6 py-4">
+                  <button onClick={() => handleToggle(item.id, item.is_available)}
+                    disabled={toggling === item.id}
+                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
+                      item.is_available
+                        ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                        : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                    } ${toggling === item.id ? 'opacity-50' : ''}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.is_available ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                    {toggling === item.id ? '...' : item.is_available ? 'Available' : 'Unavailable'}
+                  </button>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <Link href={'/admin/equipment/' + item.id}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+                      Edit
+                    </Link>
+                    <Link href={'/catalog/' + item.id} target="_blank"
+                      className="text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
+                      View
+                    </Link>
+                    <button onClick={() => handleDelete(item.id, item.name)}
+                      disabled={deleting === item.id}
+                      className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+                      {deleting === item.id ? '...' : 'Delete'}
+                    </button>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400 hidden sm:block">
-                    {new Date(booking.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </span>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${STATUS_STYLES[booking.status] || 'bg-gray-100 text-gray-600'}`}>
-                    {booking.status}
-                  </span>
-                </div>
-              </div>
+                </td>
+              </tr>
             ))}
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="space-y-4">
-          <h2 className="font-black text-[#0a1628] px-1">Quick Actions</h2>
-          {[
-            { href: '/admin/equipment/new', icon: '➕', title: 'Add Equipment', desc: 'Add new item to catalog', bg: 'bg-yellow-500 hover:bg-yellow-400', text: 'text-[#0a1628]', sub: 'text-yellow-900/60' },
-            { href: '/admin/bookings', icon: '📋', title: 'Manage Bookings', desc: pendingBookings + ' pending review', bg: 'bg-[#0a1628] hover:bg-[#0d1e35]', text: 'text-white', sub: 'text-gray-400' },
-            { href: '/admin/equipment', icon: '🚧', title: 'Equipment List', desc: totalEquipment + ' items total', bg: 'bg-gray-100 hover:bg-gray-200', text: 'text-gray-900', sub: 'text-gray-400' },
-            { href: '/admin/analytics', icon: '📊', title: 'Analytics', desc: 'Revenue & booking charts', bg: 'bg-gray-100 hover:bg-gray-200', text: 'text-gray-900', sub: 'text-gray-400' },
-          ].map(action => (
-            <Link key={action.href} href={action.href}
-              className={`${action.bg} rounded-2xl p-4 flex items-center gap-4 transition-colors`}>
-              <span className="text-2xl">{action.icon}</span>
-              <div>
-                <p className={`font-black text-sm ${action.text}`}>{action.title}</p>
-                <p className={`text-xs ${action.sub}`}>{action.desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
   )
