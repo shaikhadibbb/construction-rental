@@ -42,116 +42,129 @@ export default function CatalogPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8' }}>
 
       {/* Header */}
-      <div className="bg-[#0a1628]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <p className="text-yellow-500 text-xs font-bold tracking-widest uppercase mb-2">Our Fleet</p>
-          <h1 className="text-4xl font-black text-white mb-2">Equipment Catalog</h1>
-          <p className="text-gray-400">Professional-grade machines available for rental across India</p>
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '72px 24px 48px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <p style={{ fontSize: 12, color: '#f4a261', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Our Fleet</p>
+          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', marginBottom: 12, lineHeight: 1.05 }}>
+            Equipment Catalog
+          </h1>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>
+            Professional-grade machines available for rental across India.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px' }}>
 
         {/* Search */}
-        <div className="relative mb-8">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style={{ position: 'relative', marginBottom: 32 }}>
+          <svg style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18, color: 'rgba(255,255,255,0.25)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name, description, category..."
-            className="w-full bg-white border border-gray-200 rounded-xl pl-12 pr-12 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent shadow-sm" />
+            placeholder="Search equipment..."
+            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px 14px 48px', fontSize: 15, color: '#e8e8e8', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
+            onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.4)')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')} />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4 }}>
+              <svg style={{ width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
 
-          {/* Sidebar filters */}
-          <div className="lg:w-56 flex-shrink-0">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-24">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-black text-[#0a1628]">Filters</h3>
+          {/* Sidebar */}
+          <div style={{ width: 200, flexShrink: 0 }} className="cr-sidebar">
+            <div style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px', background: 'rgba(255,255,255,0.02)', position: 'sticky', top: 80 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Filters</p>
                 {(category !== 'All' || availableOnly) && (
                   <button onClick={() => { setCategory('All'); setAvailableOnly(false) }}
-                    className="text-xs text-yellow-600 font-semibold hover:text-yellow-700">Reset</button>
+                    style={{ fontSize: 12, color: '#f4a261', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+                    Reset
+                  </button>
                 )}
               </div>
 
-              <div className="mb-6">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Category</p>
-                <div className="space-y-1">
-                  {CATEGORIES.map(cat => (
-                    <button key={cat} onClick={() => setCategory(cat)}
-                      className={'w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ' +
-                        (category === cat ? 'bg-[#0a1628] text-yellow-500' : 'text-gray-600 hover:bg-gray-50')}>
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 700 }}>Category</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 24 }}>
+                {CATEGORIES.map(cat => (
+                  <button key={cat} onClick={() => setCategory(cat)}
+                    style={{
+                      textAlign: 'left', padding: '8px 12px', borderRadius: 8, fontSize: 14,
+                      fontWeight: category === cat ? 600 : 400, cursor: 'pointer', border: 'none',
+                      fontFamily: 'inherit', transition: 'all 0.15s',
+                      background: category === cat ? 'rgba(244,162,97,0.12)' : 'transparent',
+                      color: category === cat ? '#f4a261' : 'rgba(255,255,255,0.45)',
+                    }}>
+                    {cat}
+                  </button>
+                ))}
               </div>
 
-              <div className="border-t border-gray-100 pt-4">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Availability</p>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-700">Available only</p>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 20 }}>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14, fontWeight: 700 }}>Availability</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Available only</p>
                   <button onClick={() => setAvailableOnly(!availableOnly)}
-                    className={'w-11 h-6 rounded-full transition-colors ' + (availableOnly ? 'bg-yellow-500' : 'bg-gray-200')}>
-                    <span className={'block w-5 h-5 rounded-full bg-white shadow transform transition-transform mx-0.5 ' + (availableOnly ? 'translate-x-5' : 'translate-x-0')} />
+                    style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', transition: 'background 0.2s', background: availableOnly ? '#f4a261' : 'rgba(255,255,255,0.1)', position: 'relative', flexShrink: 0 }}>
+                    <span style={{ position: 'absolute', top: 2, left: availableOnly ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Equipment grid */}
-          <div className="flex-1">
-            {/* Results header */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-500">
-                Showing <span className="font-bold text-gray-900">{filtered.length}</span> items
-                {category !== 'All' && <span className="text-yellow-600 font-semibold"> in {category}</span>}
+          {/* Grid */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)' }}>
+                <span style={{ color: '#fff', fontWeight: 600 }}>{filtered.length}</span> machines
+                {category !== 'All' && <span style={{ color: '#f4a261' }}> · {category}</span>}
               </p>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                    <div className="h-48 bg-gray-100 animate-pulse" />
-                    <div className="p-5 space-y-3">
-                      <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
-                      <div className="h-5 w-3/4 bg-gray-100 rounded animate-pulse" />
-                      <div className="h-3 w-full bg-gray-100 rounded animate-pulse" />
+                  <div key={i} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
+                    <div style={{ height: 180, background: 'rgba(255,255,255,0.04)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div style={{ padding: '20px' }}>
+                      <div style={{ height: 10, width: 60, background: 'rgba(255,255,255,0.06)', borderRadius: 4, marginBottom: 12, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                      <div style={{ height: 16, width: '70%', background: 'rgba(255,255,255,0.06)', borderRadius: 4, animation: 'pulse 1.5s ease-in-out infinite' }} />
                     </div>
                   </div>
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-2xl border border-gray-200">
-                <div className="text-5xl mb-4">🔍</div>
-                <p className="text-xl font-bold text-gray-800 mb-2">No equipment found</p>
-                <p className="text-gray-400 text-sm mb-6">Try adjusting your search or filters</p>
+              <div style={{ textAlign: 'center', padding: '80px 24px', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, background: 'rgba(255,255,255,0.02)' }}>
+                <p style={{ fontSize: 36, marginBottom: 16 }}>🔍</p>
+                <p style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 8 }}>No equipment found</p>
+                <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.35)', marginBottom: 28 }}>Try adjusting your search or filters</p>
                 <button onClick={() => { setCategory('All'); setAvailableOnly(false); setSearch('') }}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-[#0a1628] font-bold px-6 py-2.5 rounded-lg text-sm transition-colors">
+                  style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '12px 24px', borderRadius: 10, border: 'none', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
                   Clear all filters
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filtered.map(item => (
-                  <EquipmentCard key={item.id} equipment={item} />
-                ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+                {filtered.map(item => <EquipmentCard key={item.id} equipment={item} />)}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      <style>{`
+        input::placeholder { color: rgba(255,255,255,0.18); }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
+        @media (max-width: 640px) { .cr-sidebar { display: none; } }
+      `}</style>
     </div>
   )
 }

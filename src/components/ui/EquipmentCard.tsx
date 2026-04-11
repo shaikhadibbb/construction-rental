@@ -12,60 +12,66 @@ type Equipment = {
 
 export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
   return (
-    <Link href={'/catalog/' + equipment.id}
-      className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-yellow-500/10 hover:border-yellow-300 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <Link href={'/catalog/' + equipment.id} style={{ textDecoration: 'none', display: 'block' }}>
+      <div style={{
+        border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden',
+        background: 'rgba(255,255,255,0.02)', transition: 'all 0.25s',
+        display: 'flex', flexDirection: 'column', cursor: 'pointer',
+      }}
+        onMouseOver={e => {
+          e.currentTarget.style.border = '1px solid rgba(244,162,97,0.25)'
+          e.currentTarget.style.transform = 'translateY(-3px)'
+          e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.border = '1px solid rgba(255,255,255,0.07)'
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+        }}>
 
-      {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-gray-100">
-        {equipment.image_url ? (
-          <img src={equipment.image_url} alt={equipment.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-5xl">🚧</div>
-        )}
-
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a1628]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Status badge */}
-        <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
-          equipment.is_available ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${equipment.is_available ? 'bg-white animate-pulse' : 'bg-white'}`} />
-          {equipment.is_available ? 'Available' : 'Unavailable'}
-        </span>
-
-        {/* Daily rate badge */}
-        <div className="absolute bottom-3 right-3 bg-yellow-500 text-[#0a1628] font-black text-sm px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-          ${equipment.daily_rate}/day
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
-        <span className="text-xs font-bold text-yellow-600 bg-yellow-50 border border-yellow-100 px-2.5 py-1 rounded-full capitalize w-fit mb-3">
-          {equipment.category}
-        </span>
-
-        <h3 className="font-black text-[#0a1628] text-base mb-2 group-hover:text-yellow-600 transition-colors leading-snug">
-          {equipment.name}
-        </h3>
-
-        <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1">
-          {equipment.description || 'Professional-grade equipment available for rental.'}
-        </p>
-
-        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-gray-400">Starting from</p>
-            <p className="text-base font-black text-[#0a1628]">${equipment.daily_rate}<span className="text-xs font-medium text-gray-400">/day</span></p>
-          </div>
-          <span className="flex items-center gap-1 text-sm font-bold text-yellow-600 group-hover:text-yellow-700 group-hover:gap-2 transition-all">
-            View Details
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
+        <div style={{ position: 'relative', aspectRatio: '16/9', background: '#111', overflow: 'hidden' }}>
+          {equipment.image_url ? (
+            <img src={equipment.image_url} alt={equipment.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} />
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🚧</div>
+          )}
+          <span style={{
+            position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700,
+            padding: '4px 10px', borderRadius: 100, display: 'flex', alignItems: 'center', gap: 5,
+            background: equipment.is_available ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)',
+            border: `1px solid ${equipment.is_available ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`,
+            color: equipment.is_available ? '#4ade80' : '#f87171',
+            backdropFilter: 'blur(8px)',
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: equipment.is_available ? '#4ade80' : '#f87171', display: 'inline-block' }} />
+            {equipment.is_available ? 'Available' : 'Unavailable'}
           </span>
+        </div>
+
+        <div style={{ padding: '20px 22px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: 11, color: '#f4a261', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, marginBottom: 8, display: 'block' }}>
+            {equipment.category}
+          </span>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8, letterSpacing: '-0.01em', lineHeight: 1.3 }}>
+            {equipment.name}
+          </h3>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, flex: 1, marginBottom: 16, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
+            {equipment.description || 'Professional-grade equipment available for rental.'}
+          </p>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginBottom: 2 }}>Starting from</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>
+                ₹{equipment.daily_rate.toLocaleString('en-IN')}
+                <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.3)' }}>/day</span>
+              </p>
+            </div>
+            <span style={{ fontSize: 13, color: '#f4a261', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              View
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg>
+            </span>
+          </div>
         </div>
       </div>
     </Link>
