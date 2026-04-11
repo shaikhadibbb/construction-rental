@@ -1,319 +1,183 @@
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import EquipmentCard from '@/components/ui/EquipmentCard'
+import ContactFormSection from '@/components/ui/ContactFormSection'
 
 export default async function HomePage() {
   const { data: equipment } = await supabase
     .from('equipment')
     .select('*')
     .eq('is_available', true)
-    .limit(3)
-
-  const { count: totalEquipment } = await supabase
-    .from('equipment')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: totalBookings } = await supabase
-    .from('bookings')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: totalUsers } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-
-  const CATEGORIES = [
-    { name: 'Excavators', icon: '🚧', slug: 'excavators', desc: 'Hydraulic & crawler' },
-    { name: 'Cranes', icon: '🏗️', slug: 'cranes', desc: 'Tower & mobile' },
-    { name: 'Forklifts', icon: '🚜', slug: 'forklifts', desc: 'Electric & diesel' },
-    { name: 'Compactors', icon: '🛞', slug: 'compactors', desc: 'Plate & roller' },
-    { name: 'Telehandlers', icon: '🔧', slug: 'telehandlers', desc: 'Rotating & fixed' },
-    { name: 'Compressors', icon: '⚙️', slug: 'compressors', desc: 'Portable & stationary' },
-  ]
-
-  const STEPS = [
-    { num: '01', title: 'Browse & Select', desc: 'Search our catalog of professional-grade machines by category, specs, or availability.', icon: '🔍' },
-    { num: '02', title: 'Request a Quote', desc: 'Submit your project details and rental period. Our team responds within 2 hours.', icon: '📋' },
-    { num: '03', title: 'Deploy & Build', desc: 'Equipment arrives on site on your confirmed date, inspected and ready to work.', icon: '🏗️' },
-  ]
-
-  const TESTIMONIALS = [
-    { name: 'Rajesh Kumar', role: 'Site Manager', company: 'Larsen & Toubro, Mumbai', text: 'Booked an excavator in under 3 minutes. Seamless process and equipment was in perfect condition.', rating: 5 },
-    { name: 'Priya Sharma', role: 'Senior Contractor', company: 'Shapoorji Pallonji, Pune', text: 'Finally a platform with real prices and no negotiation games. Saved me hours every single month.', rating: 5 },
-    { name: 'Amir Khan', role: 'Project Director', company: 'Gammon India, Delhi', text: 'The online dashboard makes tracking all our rentals across sites incredibly easy.', rating: 5 },
-  ]
-
-  const TRUST = [
-    { value: totalEquipment + '+', label: 'Equipment Items', icon: '🚧' },
-    { value: totalBookings + '+', label: 'Completed Rentals', icon: '✅' },
-    { value: totalUsers + '+', label: 'Verified Contractors', icon: '👷' },
-    { value: '24h', label: 'Quote Response', icon: '⚡' },
-  ]
+    .limit(6)
 
   return (
-    <div className="bg-white">
+    <div style={{ background: '#faf9f7', color: '#1a1a1a', fontFamily: 'inherit' }}>
 
-      {/* ── HERO ── */}
-      <section className="relative bg-[#0a1628] overflow-hidden min-h-[600px] flex items-center">
-        {/* Background texture */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px)'}} />
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/4" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4" />
+      {/* HERO */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '100px 24px 80px' }}>
+        <p style={{ fontSize: 13, color: '#aaa', marginBottom: 20, letterSpacing: '0.05em' }}>
+          Construction Equipment Rental · India
+        </p>
+        <h1 style={{ fontSize: 'clamp(2.4rem, 6vw, 4rem)', fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: 24 }}>
+          Your Equipment.<br />Delivered.
+        </h1>
+        <p style={{ fontSize: 18, color: '#555', lineHeight: 1.7, maxWidth: 520, marginBottom: 36 }}>
+          Upload your project specs. Get matched with verified equipment in under 2 hours — no phone calls, no haggling, no delays.
+        </p>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <a href="#equipment"
+            style={{ background: '#f4a261', color: '#fff', fontWeight: 700, padding: '13px 28px', borderRadius: 8, textDecoration: 'none', fontSize: 15 }}>
+            Browse Equipment
+          </a>
+          <Link href="/contact"
+            style={{ background: 'transparent', color: '#1a1a1a', fontWeight: 600, padding: '12px 28px', borderRadius: 8, textDecoration: 'none', fontSize: 15, border: '1.5px solid #ddd' }}>
+            Get a Quote
+          </Link>
         </div>
+      </section>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
-          <div className="max-w-3xl">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full px-4 py-2 mb-8">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-              <span className="text-yellow-400 text-sm font-semibold tracking-wide">INDIA'S LEADING EQUIPMENT RENTAL PLATFORM</span>
+      <div style={{ borderTop: '1px solid #ece9e4', maxWidth: 720, margin: '0 auto' }} />
+
+      {/* PROBLEM */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px' }}>
+        <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: 48, letterSpacing: '-0.02em' }}>
+          Equipment rental is broken.
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+          {[
+            { label: 'The Phone Tag', desc: 'Call 5 suppliers. Leave 3 voicemails. Wait 2 days.' },
+            { label: 'The Hidden Costs', desc: 'Quote says ₹50K. Actual bill: ₹63K.' },
+            { label: 'The Downtime', desc: 'Equipment breaks. No backup. Project delayed.' },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+              <span style={{ color: '#f4a261', fontWeight: 800, fontSize: 14, minWidth: 20, paddingTop: 2 }}>✕</span>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{item.label}</p>
+                <p style={{ color: '#777', fontSize: 15, lineHeight: 1.65 }}>{item.desc}</p>
+              </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight mb-6">
-              Professional
-              <span className="block text-yellow-500">Construction</span>
-              <span className="block text-gray-300 text-4xl sm:text-5xl lg:text-6xl font-bold mt-1">Equipment Rental</span>
-            </h1>
+      <div style={{ borderTop: '1px solid #ece9e4', maxWidth: 720, margin: '0 auto' }} />
 
-            <p className="text-gray-400 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl">
-              Access 50+ professional-grade machines from verified suppliers. Request a quote in minutes — no middlemen, no paperwork, just the right equipment on time.
-            </p>
+      {/* HOW IT WORKS */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px' }}>
+        <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>
+          Three steps. One delivery. Zero friction.
+        </h2>
+        <p style={{ color: '#777', fontSize: 15, marginBottom: 52 }}>We handle the complexity so you can focus on building.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+          {[
+            { num: '01', title: 'Browse', desc: 'Search by equipment type, location, and availability. Every machine is listed with real specs and real pricing.' },
+            { num: '02', title: 'Book', desc: 'Instant quotes. No negotiation. One-click confirm. Our team responds within 2 hours.' },
+            { num: '03', title: 'Build', desc: 'Equipment arrives inspected, on time, and ready to work. Operator included on request.' },
+          ].map(step => (
+            <div key={step.num} style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#ccc', minWidth: 28, paddingTop: 4, letterSpacing: '0.05em' }}>{step.num}</span>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 17, marginBottom: 6 }}>{step.title}</p>
+                <p style={{ color: '#666', fontSize: 15, lineHeight: 1.7 }}>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+      <div style={{ borderTop: '1px solid #ece9e4', maxWidth: 720, margin: '0 auto' }} />
+
+      {/* EQUIPMENT */}
+      {equipment && equipment.length > 0 && (
+        <>
+          <section id="equipment" style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px' }}>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>
+              Available now.
+            </h2>
+            <p style={{ color: '#777', fontSize: 15, marginBottom: 48 }}>All equipment is inspected before delivery.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+              {equipment.map(item => (
+                <EquipmentCard key={item.id} equipment={item} />
+              ))}
+            </div>
+            <div style={{ marginTop: 40 }}>
               <Link href="/catalog"
-                className="inline-flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-8 py-4 rounded-xl text-base transition-all hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/25">
-                Browse Equipment
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-              </Link>
-              <Link href="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-xl text-base transition-colors">
-                Talk to an Expert
+                style={{ color: '#f4a261', fontWeight: 700, fontSize: 15, textDecoration: 'none', borderBottom: '1.5px solid #f4a261', paddingBottom: 2 }}>
+                View all equipment →
               </Link>
             </div>
+          </section>
+          <div style={{ borderTop: '1px solid #ece9e4', maxWidth: 720, margin: '0 auto' }} />
+        </>
+      )}
 
-            {/* Mini trust bar */}
-            <div className="flex flex-wrap gap-6 mt-12">
-              {['ISO Certified Equipment', 'On-time Delivery Guaranteed', 'Pan-India Coverage'].map(item => (
-                <div key={item} className="flex items-center gap-2 text-gray-400 text-sm">
-                  <svg className="w-4 h-4 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60V30C360 0 720 60 1080 30C1260 15 1380 5 1440 0V60H0Z" fill="white"/>
-          </svg>
-        </div>
-      </section>
-
-      {/* ── TRUST STATS ── */}
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {TRUST.map(stat => (
-              <div key={stat.label} className="text-center group">
-                <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 group-hover:bg-yellow-500 transition-colors group-hover:scale-110 transition-transform">
-                  {stat.icon}
-                </div>
-                <p className="text-3xl font-black text-[#0a1628]">{stat.value}</p>
-                <p className="text-sm text-gray-500 font-medium mt-0.5">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CATEGORIES ── */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-yellow-600 text-sm font-bold tracking-widest uppercase mb-2">Our Fleet</p>
-              <h2 className="text-4xl font-black text-[#0a1628]">Browse by Category</h2>
-              <p className="text-gray-500 mt-2">Professionally maintained equipment for every project</p>
-            </div>
-            <Link href="/catalog" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-yellow-600 hover:text-yellow-700">
-              View all <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {CATEGORIES.map(cat => (
-              <Link key={cat.slug} href={'/catalog?category=' + cat.slug}
-                className="group bg-white border border-gray-200 rounded-2xl p-5 text-center hover:border-yellow-400 hover:shadow-lg hover:shadow-yellow-500/10 transition-all hover:-translate-y-1">
-                <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
-                <p className="font-bold text-gray-900 text-sm">{cat.name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{cat.desc}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FEATURED EQUIPMENT ── */}
-      <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-yellow-600 text-sm font-bold tracking-widest uppercase mb-2">Available Now</p>
-              <h2 className="text-4xl font-black text-[#0a1628]">Featured Equipment</h2>
-              <p className="text-gray-500 mt-2">Ready to deploy to your site</p>
-            </div>
-            <Link href="/catalog" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-yellow-600 hover:text-yellow-700">
-              View all <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {equipment?.map(item => (
-              <EquipmentCard key={item.id} equipment={item} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-20 bg-[#0a1628]">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <p className="text-yellow-500 text-sm font-bold tracking-widest uppercase mb-3">Simple Process</p>
-            <h2 className="text-4xl font-black text-white">How It Works</h2>
-            <p className="text-gray-400 mt-3 text-lg">From request to deployment in 3 steps</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
-            {/* Connector line */}
-            <div className="hidden sm:block absolute top-10 left-1/6 right-1/6 h-px bg-gradient-to-r from-yellow-500/0 via-yellow-500/50 to-yellow-500/0" />
-
-            {STEPS.map((step, i) => (
-              <div key={step.num} className="relative text-center">
-                <div className="relative inline-block mb-6">
-                  <div className="w-20 h-20 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-3xl mx-auto">
-                    {step.icon}
-                  </div>
-                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-yellow-500 text-[#0a1628] text-xs font-black flex items-center justify-center">
-                    {i + 1}
-                  </span>
-                </div>
-                <p className="text-xs font-black text-yellow-500 tracking-widest mb-2">STEP {step.num}</p>
-                <h3 className="font-bold text-white text-lg mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-yellow-600 text-sm font-bold tracking-widest uppercase mb-3">Social Proof</p>
-            <h2 className="text-4xl font-black text-[#0a1628]">Trusted by India's Best</h2>
-            <p className="text-gray-500 mt-2">Contractors from leading firms rely on ConstructRent</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(t => (
-              <div key={t.name} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-yellow-200 transition-all">
-                <div className="flex gap-0.5 mb-4">
-                  {[...Array(t.rating)].map((_, i) => (
-                    <svg key={i} className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#0a1628] text-yellow-500 flex items-center justify-center font-black text-sm">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">{t.name}</p>
-                    <p className="text-gray-400 text-xs">{t.role} · {t.company}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHY US ── */}
-      <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="text-yellow-600 text-sm font-bold tracking-widest uppercase mb-3">Why ConstructRent</p>
-              <h2 className="text-4xl font-black text-[#0a1628] mb-6">Built for Serious Contractors</h2>
-              <p className="text-gray-500 text-lg leading-relaxed mb-8">
-                We understand that downtime costs money. That's why every machine in our fleet is regularly serviced, inspected, and ready to deploy on your timeline.
-              </p>
-              <div className="space-y-4">
-                {[
-                  { title: 'Verified Equipment', desc: 'Every machine undergoes 50-point inspection before rental.' },
-                  { title: 'Transparent Pricing', desc: 'No hidden fees. The price you see is the price you pay.' },
-                  { title: 'Dedicated Support', desc: '24/7 on-call support for any on-site equipment issues.' },
-                  { title: 'Pan-India Delivery', desc: 'We deliver to your site anywhere across India.' },
-                ].map(item => (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900 text-sm">{item.title}</p>
-                      <p className="text-gray-500 text-sm">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+      {/* PRICING */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px' }}>
+        <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>
+          Simple, transparent pricing.
+        </h2>
+        <p style={{ color: '#777', fontSize: 15, marginBottom: 40 }}>No subscriptions. No hidden fees.</p>
+        <div style={{ border: '1px solid #ece9e4', borderRadius: 12, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #ece9e4', background: '#f5f3f0' }}>
+                <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: 12, fontWeight: 700, color: '#aaa', letterSpacing: '0.06em' }}>EQUIPMENT</th>
+                <th style={{ textAlign: 'right', padding: '14px 20px', fontSize: 12, fontWeight: 700, color: '#aaa', letterSpacing: '0.06em' }}>DAILY</th>
+                <th style={{ textAlign: 'right', padding: '14px 20px', fontSize: 12, fontWeight: 700, color: '#aaa', letterSpacing: '0.06em' }}>WEEKLY</th>
+              </tr>
+            </thead>
+            <tbody>
               {[
-                { num: '50+', label: 'Machine Types', color: 'bg-[#0a1628] text-white' },
-                { num: '99%', label: 'On-time Rate', color: 'bg-yellow-500 text-[#0a1628]' },
-                { num: '2hr', label: 'Quote Response', color: 'bg-yellow-500 text-[#0a1628]' },
-                { num: '5★', label: 'Average Rating', color: 'bg-[#0a1628] text-white' },
-              ].map(card => (
-                <div key={card.label} className={`${card.color} rounded-2xl p-8 text-center`}>
-                  <p className="text-4xl font-black mb-1">{card.num}</p>
-                  <p className="text-sm font-semibold opacity-75">{card.label}</p>
-                </div>
+                { name: 'Excavator (20T)', daily: '₹8,000', weekly: '₹45,000' },
+                { name: 'Crane (50T)', daily: '₹15,000', weekly: '₹80,000' },
+                { name: 'Bulldozer', daily: '₹12,000', weekly: '₹65,000' },
+                { name: 'Forklift', daily: '₹5,000', weekly: '₹28,000' },
+                { name: 'Compactor', daily: '₹4,000', weekly: '₹22,000' },
+              ].map((row, i, arr) => (
+                <tr key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid #ece9e4' : 'none' }}>
+                  <td style={{ padding: '16px 20px', fontSize: 15, fontWeight: 500 }}>{row.name}</td>
+                  <td style={{ padding: '16px 20px', fontSize: 15, textAlign: 'right', color: '#555' }}>{row.daily}</td>
+                  <td style={{ padding: '16px 20px', fontSize: 15, textAlign: 'right', color: '#555' }}>{row.weekly}</td>
+                </tr>
               ))}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </div>
+        <p style={{ fontSize: 13, color: '#bbb', marginTop: 14 }}>
+          Transport and operator included. Custom pricing for 30+ day rentals.
+        </p>
+        <div style={{ marginTop: 32 }}>
+          <Link href="/catalog"
+            style={{ background: '#f4a261', color: '#fff', fontWeight: 700, padding: '13px 28px', borderRadius: 8, textDecoration: 'none', fontSize: 15, display: 'inline-block' }}>
+            Get an exact quote →
+          </Link>
         </div>
       </section>
 
-      {/* ── FINAL CTA ── */}
-      <section className="py-24 bg-[#0a1628] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.5) 0, rgba(255,255,255,0.5) 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px'}} />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-yellow-500/5 rounded-full blur-3xl" />
+      <div style={{ borderTop: '1px solid #ece9e4', maxWidth: 720, margin: '0 auto' }} />
 
-        <div className="relative max-w-3xl mx-auto px-4 text-center">
-          <p className="text-yellow-500 text-sm font-bold tracking-widest uppercase mb-4">Start Today</p>
-          <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">Ready to Build Something Great?</h2>
-          <p className="text-gray-400 text-lg mb-10">Join hundreds of contractors who trust ConstructRent for their equipment needs.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/catalog"
-              className="inline-flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-10 py-4 rounded-xl text-base transition-all hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/30">
-              Browse Equipment →
-            </Link>
-            <Link href="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-10 py-4 rounded-xl text-base transition-colors">
-              Contact Sales
-            </Link>
-          </div>
-        </div>
+      {/* FOUNDER NOTE */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px' }}>
+        <blockquote style={{ margin: 0 }}>
+          <p style={{ fontSize: 'clamp(1.1rem, 3vw, 1.3rem)', lineHeight: 1.8, color: '#333', fontStyle: 'italic', fontWeight: 400, marginBottom: 28 }}>
+            "I watched contractors waste 20+ hours a month chasing equipment. So I built a platform to do it in 2 hours."
+          </p>
+          <footer>
+            <p style={{ fontWeight: 700, fontSize: 15 }}>Adib Azam Shaikh</p>
+            <p style={{ fontSize: 13, color: '#aaa', marginTop: 3 }}>Founder, ConstructRent</p>
+          </footer>
+        </blockquote>
+      </section>
+
+      <div style={{ borderTop: '1px solid #ece9e4', maxWidth: 720, margin: '0 auto' }} />
+
+      {/* CONTACT */}
+      <section style={{ maxWidth: 720, margin: '0 auto', padding: '80px 24px' }}>
+        <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: 8, letterSpacing: '-0.02em' }}>
+          Need something specific?
+        </h2>
+        <p style={{ color: '#777', fontSize: 15, marginBottom: 36 }}>Tell us what you need and we will get back to you within 2 hours.</p>
+        <ContactFormSection />
       </section>
 
     </div>
