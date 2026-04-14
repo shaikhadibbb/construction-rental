@@ -22,114 +22,134 @@ export default function LoginPage() {
     else { router.push('/dashboard') }
   }
 
-  const inputClass = "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent focus:bg-white transition-colors"
-  const labelClass = "block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2"
+  const input: React.CSSProperties = {
+    width: '100%', padding: '13px 16px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 10, fontSize: 15, color: '#e8e8e8',
+    outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
+    transition: 'border-color 0.2s',
+  }
 
   return (
-    <div className="min-h-screen bg-[#0a1628] flex">
+    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
 
-      {/* Left panel — branding */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px)'}} />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-yellow-500/5 rounded-full blur-3xl" />
+      {/* Grid texture */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
-        <Link href="/" className="flex items-center gap-2 relative z-10">
-          <div className="w-8 h-8 bg-yellow-500 rounded flex items-center justify-center">
-            <svg className="w-5 h-5 text-[#0a1628]" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-          </div>
-          <span className="font-black text-white text-lg">Construct<span className="text-yellow-500">Rent</span></span>
+      {/* Left panel */}
+      <div style={{ display: 'none', width: '50%', flexDirection: 'column', justifyContent: 'space-between', padding: '48px', borderRight: '1px solid rgba(255,255,255,0.06)', position: 'relative', zIndex: 1 }} className="cr-left-panel">
+        <div style={{ position: 'absolute', top: '20%', right: 0, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(244,162,97,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        <Link href="/" style={{ fontWeight: 800, fontSize: 17, color: '#fff', textDecoration: 'none', letterSpacing: '-0.03em', position: 'relative', zIndex: 1 }}>
+          Construct<span style={{ color: '#f4a261' }}>Rent</span>
         </Link>
 
-        <div className="relative z-10">
-          <h2 className="text-4xl font-black text-white leading-tight mb-4">
-            India's Most Trusted<br /><span className="text-yellow-500">Equipment Rental</span><br />Platform
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 700, color: '#fff', lineHeight: 1.15, marginBottom: 16, letterSpacing: '-0.03em' }}>
+            India's most trusted<br />
+            <span style={{ color: '#f4a261' }}>equipment rental</span><br />
+            platform.
           </h2>
-          <p className="text-gray-400 text-lg leading-relaxed mb-10">
-            Access 50+ professional-grade machines. Request a quote in minutes.
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.4)', lineHeight: 1.75, marginBottom: 48 }}>
+            Access 50+ machines. Request a quote in minutes. Get equipment on site in hours.
           </p>
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[
               '50+ equipment items across 6 categories',
               'Quote response within 2 hours',
               'On-site delivery across India',
-              'Verified & insured equipment',
+              'Verified and insured equipment',
             ].map(item => (
-              <div key={item} className="flex items-center gap-3 text-gray-300 text-sm">
-                <div className="w-5 h-5 bg-yellow-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-3 h-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(244,162,97,0.15)', border: '1px solid rgba(244,162,97,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="10" height="10" fill="none" stroke="#f4a261" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
-                {item}
+                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)' }}>{item}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-gray-600 text-xs relative z-10">© 2026 ConstructRent. All rights reserved.</p>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.18)', position: 'relative', zIndex: 1 }}>© 2026 ConstructRent</p>
       </div>
 
       {/* Right panel — form */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', position: 'relative', zIndex: 1 }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
 
           {/* Mobile logo */}
-          <Link href="/" className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-7 h-7 bg-yellow-500 rounded flex items-center justify-center">
-              <svg className="w-4 h-4 text-[#0a1628]" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-            </div>
-            <span className="font-black text-[#0a1628]">Construct<span className="text-yellow-500">Rent</span></span>
+          <Link href="/" style={{ fontWeight: 800, fontSize: 17, color: '#fff', textDecoration: 'none', letterSpacing: '-0.03em', display: 'block', marginBottom: 40 }} className="cr-mobile-logo">
+            Construct<span style={{ color: '#f4a261' }}>Rent</span>
           </Link>
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-black text-[#0a1628]">Welcome back</h1>
-            <p className="text-gray-400 mt-1">Sign in to manage your rentals</p>
+          <div style={{ marginBottom: 36 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 8, letterSpacing: '-0.03em' }}>Welcome back</h1>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.38)', lineHeight: 1.6 }}>Sign in to manage your rentals</p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm flex items-center gap-2">
-              <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+            <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '12px 16px', marginBottom: 24, fontSize: 14, color: '#f87171', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style={{ flexShrink: 0 }}><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className={labelClass}>Email Address</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Email</label>
               <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com" className={inputClass} />
+                placeholder="you@example.com" style={input}
+                onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.5)')}
+                onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
             </div>
 
             <div>
-              <label className={labelClass}>Password</label>
-              <div className="relative">
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Password</label>
+              <div style={{ position: 'relative' }}>
                 <input type={showPassword ? 'text' : 'password'} required value={password}
                   onChange={e => setPassword(e.target.value)} placeholder="Your password"
-                  className={inputClass + ' pr-12'} />
+                  style={{ ...input, paddingRight: 56 }}
+                  onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.5)')}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-semibold">
+                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', fontFamily: 'inherit', letterSpacing: '0.05em' }}>
                   {showPassword ? 'HIDE' : 'SHOW'}
                 </button>
               </div>
             </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full bg-yellow-500 hover:bg-yellow-400 disabled:bg-yellow-300 text-[#0a1628] font-black py-3.5 rounded-xl transition-all hover:scale-[1.01] hover:shadow-lg hover:shadow-yellow-500/20 text-sm">
+            <button type="submit" disabled={loading} style={{
+              background: loading ? 'rgba(244,162,97,0.5)' : '#f4a261',
+              color: '#0a0a0a', fontWeight: 700, padding: '14px', borderRadius: 10,
+              border: 'none', fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer',
+              fontFamily: 'inherit', marginTop: 4, transition: 'all 0.2s',
+              boxShadow: loading ? 'none' : '0 0 30px rgba(244,162,97,0.2)',
+            }}>
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-[#0a1628] border-t-transparent rounded-full animate-spin" />
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <span style={{ width: 16, height: 16, border: '2px solid #0a0a0a', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
                   Signing in...
                 </span>
               ) : 'Sign In →'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-400 mt-6">
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 28 }}>
             Don't have an account?{' '}
-            <Link href="/register" className="text-yellow-600 font-bold hover:text-yellow-700">Create one free</Link>
+            <Link href="/register" style={{ color: '#f4a261', fontWeight: 600, textDecoration: 'none' }}>Create one free</Link>
           </p>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        input::placeholder { color: rgba(255,255,255,0.18); }
+        @media (min-width: 1024px) {
+          .cr-left-panel { display: flex !important; }
+          .cr-mobile-logo { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }
