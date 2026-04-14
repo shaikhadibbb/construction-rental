@@ -82,7 +82,7 @@ export default function AdminBookingsPage() {
   type TabKey = 'all' | BookingStatus
   const tabs: TabKey[] = ['all', ...ALL_STATUSES]
 
-  const surface: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }
+  const surface: React.CSSProperties = { background: 'var(--surface-0)', border: '1px solid var(--border-subtle)', borderRadius: 14, boxShadow: 'var(--shadow-soft)' }
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 240 }}>

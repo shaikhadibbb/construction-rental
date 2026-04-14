@@ -4,7 +4,6 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
-import type { TooltipProps } from 'recharts'
 
 const COLORS = ['#f4a261', '#4ade80', '#60a5fa', '#eab308', '#8b5cf6', '#ef4444']
 
@@ -24,7 +23,13 @@ type Equipment = {
   is_available: boolean
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+interface ChartTooltipProps {
+  active?: boolean
+  payload?: Array<{ value: number | string }>
+  label?: string
+}
+
+const CustomTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div style={{ background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
@@ -36,7 +41,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
   return null
 }
 
-const RevenueTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const RevenueTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div style={{ background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
@@ -98,7 +103,7 @@ export default function AnalyticsCharts({ bookings, equipment }: { bookings: Boo
     name: name.charAt(0).toUpperCase() + name.slice(1), value
   }))
 
-  const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }
+  const cardStyle: React.CSSProperties = { background: 'var(--surface-0)', border: '1px solid var(--border-subtle)', borderRadius: 16, padding: '24px', boxShadow: 'var(--shadow-soft)' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>

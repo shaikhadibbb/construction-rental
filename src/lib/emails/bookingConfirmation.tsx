@@ -1,3 +1,5 @@
+import { SITE_URL } from '@/lib/constants'
+
 export function bookingConfirmationEmail({
   userName,
   equipmentName,
@@ -76,7 +78,7 @@ export function bookingConfirmationEmail({
       <p style="color:#6b7280;font-size:13px;margin:0 0 8px;">Booking Reference</p>
       <p style="color:#111827;font-size:13px;font-family:monospace;background:#f3f4f6;padding:8px 12px;border-radius:6px;margin:0 0 24px;">${bookingId}</p>
 
-      <a href="https://constructionrental.vercel.app/dashboard"
+      <a href="${SITE_URL}/dashboard"
          style="display:block;background:#eab308;color:#111827;text-decoration:none;text-align:center;padding:14px;border-radius:10px;font-weight:bold;font-size:15px;">
         View My Dashboard →
       </a>

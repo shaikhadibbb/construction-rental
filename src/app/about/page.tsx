@@ -28,7 +28,7 @@ const TIMELINE = [
 
 export default function AboutPage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
       {/* Hero */}
@@ -114,7 +114,7 @@ export default function AboutPage() {
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <div style={{ borderLeft: '2px solid rgba(244,162,97,0.35)', paddingLeft: 32 }}>
             <p style={{ fontSize: 'clamp(1.1rem, 2.5vw, 1.35rem)', lineHeight: 1.85, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', marginBottom: 28 }}>
-              "I watched contractors waste 20+ hours a month chasing equipment. So I built a platform to do it in 2 hours."
+              &ldquo;I watched contractors waste 20+ hours a month chasing equipment. So I built a platform to do it in 2 hours.&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, #f4a261, #e76f51)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 16, color: '#fff', flexShrink: 0 }}>A</div>

@@ -61,15 +61,14 @@ export default function ProfilePage() {
     </div>
   )
 
-  const memberSince = user ? new Date(user.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
   const initials = (fullName || user?.email || '?')[0].toUpperCase()
 
-  const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '24px' }
-  const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#fff', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box', fontFamily: 'inherit' }
+  const cardStyle: React.CSSProperties = { background: 'var(--surface-0)', border: '1px solid var(--border-subtle)', borderRadius: 20, padding: '24px', boxShadow: 'var(--shadow-soft)' }
+  const inputStyle: React.CSSProperties = { width: '100%', background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#fff', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box', fontFamily: 'inherit' }
   const labelStyle: React.CSSProperties = { display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8' }}>
+    <div className="ui-page-shell" style={{ color: '#e8e8e8' }}>
 
       {/* Hero Header */}
       <div style={{ background: 'linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(8,8,8,1) 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -139,7 +138,7 @@ export default function ProfilePage() {
 
         {/* Recent Bookings */}
         <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '24px', display: 'flex', alignItems: 'center', justify: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <h2 style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>Recent Activity</h2>
             <Link href="/dashboard" style={{ fontSize: 12, color: '#f4a261', fontWeight: 700, textDecoration: 'none' }}>Full Dashboard →</Link>
           </div>
@@ -166,7 +165,7 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 2, truncate: 'true' }}>{equipName}</p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{equipName}</p>
                       <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'capitalize' }}>{booking.equipment?.category || 'Machine'}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>

@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { env } from './env'
+import { publicEnv } from './env'
 
-const { supabaseUrl, supabaseAnonKey } = env
+const { supabaseUrl, supabaseAnonKey } = publicEnv
 
 /**
  * Server-side Supabase client factory.

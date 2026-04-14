@@ -76,7 +76,7 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+    width: '100%', background: 'var(--surface-1)', border: '1px solid var(--border-subtle)',
     borderRadius: 10, padding: '10px 14px', fontSize: 14, color: '#e8e8e8',
     outline: 'none', fontFamily: 'inherit', transition: 'border-color 0.2s', boxSizing: 'border-box',
   }
@@ -160,7 +160,7 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
       )}
 
       <button onClick={handleSubmit} disabled={loading}
-        style={{ width: '100%', background: '#f4a261', color: '#0a0a0a', fontWeight: 800, padding: '13px', borderRadius: 10, border: 'none', fontSize: 14, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1 }}>
+        style={{ width: '100%', background: 'var(--accent)', color: '#0a0a0a', fontWeight: 800, padding: '13px', borderRadius: 10, border: 'none', fontSize: 14, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1, boxShadow: '0 0 28px rgba(244,162,97,0.22)' }}>
         {loading ? (
           <>
             <span style={{ width: 14, height: 14, border: '2px solid rgba(10,10,10,0.3)', borderTopColor: '#0a0a0a', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />

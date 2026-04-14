@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/constants'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/dashboard/', '/profile/', '/api/'],
       },
     ],
-    sitemap: 'https://constructionrental.vercel.app/sitemap.xml',
+    sitemap: `${SITE_URL}/sitemap.xml`,
   }
 }

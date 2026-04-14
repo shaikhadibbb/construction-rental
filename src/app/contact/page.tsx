@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { CALL_NUMBER, WHATSAPP_NUMBER, ADMIN_EMAIL } from '@/lib/constants'
+import { pushToast } from '@/lib/toast'
 
 const INFO = [
   { icon: '📍', title: 'Location', lines: ['Mumbai, Maharashtra', 'India'] },
-  { icon: '📞', title: 'Phone', lines: ['+91 98765 43210', 'Mon–Sat, 9am–6pm IST'] },
-  { icon: '✉️', title: 'Email', lines: ['hello@constructrent.in', 'We reply within 2 hours'] },
+  { icon: '📞', title: 'Phone', lines: [CALL_NUMBER, 'Mon–Sat, 9am–6pm IST'] },
+  { icon: '✉️', title: 'Email', lines: [ADMIN_EMAIL, 'We reply within 2 hours'] },
   { icon: '⏰', title: 'Hours', lines: ['Monday to Saturday', '9:00 AM — 6:00 PM IST'] },
 ]
 
@@ -21,7 +22,13 @@ export default function ContactPage() {
     if (!form.name || !form.email || !form.message) { setError('Please fill in all required fields'); return }
     setLoading(true)
     const res = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    if (res.ok) { setSent(true) } else { setError('Failed to send. Please try again.') }
+    if (res.ok) {
+      setSent(true)
+      pushToast({ title: 'Message sent', description: 'We will respond within 2 hours.', variant: 'success' })
+    } else {
+      setError('Failed to send. Please try again.')
+      pushToast({ title: 'Failed to send message', variant: 'error' })
+    }
     setLoading(false)
   }
 
@@ -32,7 +39,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
       {/* Header */}
@@ -59,7 +66,7 @@ export default function ContactPage() {
               </div>
             ))}
 
-            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 14, padding: '18px 20px', textDecoration: 'none', transition: 'all 0.2s' }}>
               <span style={{ fontSize: 22 }}>📱</span>
               <div>
@@ -76,7 +83,7 @@ export default function ContactPage() {
                 <svg width="24" height="24" fill="none" stroke="#080808" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
               </div>
               <h2 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8, letterSpacing: '-0.02em' }}>Message sent.</h2>
-              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 32 }}>We'll get back to you within 2 hours.</p>
+              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 32 }}>We&apos;ll get back to you within 2 hours.</p>
               <button onClick={() => { setSent(false); setForm({ name: '', email: '', subject: '', message: '' }) }}
                 style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '12px 24px', borderRadius: 10, border: 'none', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
                 Send another message

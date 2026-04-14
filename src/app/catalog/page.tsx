@@ -42,16 +42,16 @@ export default function CatalogPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8' }}>
+    <div className="ui-page-shell">
 
       {/* Header */}
-      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '72px 24px 48px' }}>
+      <div style={{ borderBottom: '1px solid var(--border-subtle)', padding: '72px 24px 48px', background: 'linear-gradient(180deg, rgba(255,255,255,0.02), transparent)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <p style={{ fontSize: 12, color: '#f4a261', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>Our Fleet</p>
+          <p style={{ fontSize: 11, color: '#f4a261', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 14, fontWeight: 700 }}>Rental Intelligence</p>
           <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', marginBottom: 12, lineHeight: 1.05 }}>
             Equipment Catalog
           </h1>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>
+          <p style={{ fontSize: 16, color: 'var(--text-muted)', lineHeight: 1.7 }}>
             Professional-grade machines available for rental across India.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function CatalogPage() {
           </svg>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search equipment..."
-            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px 14px 48px', fontSize: 15, color: '#e8e8e8', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
+            style={{ width: '100%', background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', borderRadius: 12, padding: '14px 16px 14px 48px', fontSize: 15, color: '#e8e8e8', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
             onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.4)')}
             onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')} />
           {search && (

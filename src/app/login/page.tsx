@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { pushToast } from '@/lib/toast'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,21 +20,28 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(error.message); setLoading(false) }
-    else { router.push('/dashboard') }
+    if (error) {
+      setError(error.message)
+      pushToast({ title: 'Login failed', description: error.message, variant: 'error' })
+      setLoading(false)
+    } else {
+      pushToast({ title: 'Welcome back', description: 'Signed in successfully.', variant: 'success' })
+      const redirectTo = searchParams.get('redirect') || '/dashboard'
+      router.push(redirectTo)
+    }
   }
 
   const input: React.CSSProperties = {
     width: '100%', padding: '13px 16px',
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'var(--surface-1)',
+    border: '1px solid var(--border-subtle)',
     borderRadius: 10, fontSize: 15, color: '#e8e8e8',
     outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
     transition: 'border-color 0.2s',
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ display: 'flex', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
 
       {/* Grid texture */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
@@ -41,13 +50,14 @@ export default function LoginPage() {
       <div style={{ display: 'none', width: '50%', flexDirection: 'column', justifyContent: 'space-between', padding: '48px', borderRight: '1px solid rgba(255,255,255,0.06)', position: 'relative', zIndex: 1 }} className="cr-left-panel">
         <div style={{ position: 'absolute', top: '20%', right: 0, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(244,162,97,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-        <Link href="/" style={{ fontWeight: 800, fontSize: 17, color: '#fff', textDecoration: 'none', letterSpacing: '-0.03em', position: 'relative', zIndex: 1 }}>
-          Construct<span style={{ color: '#f4a261' }}>Rent</span>
+        <Link href="/" className="brand-logo" style={{ fontSize: 17, position: 'relative', zIndex: 1 }}>
+          <span className="brand-logo-mark" aria-hidden="true" />
+          Construct<span className="brand-logo-accent">Rent</span>
         </Link>
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 700, color: '#fff', lineHeight: 1.15, marginBottom: 16, letterSpacing: '-0.03em' }}>
-            India's most trusted<br />
+            India&apos;s most trusted<br />
             <span style={{ color: '#f4a261' }}>equipment rental</span><br />
             platform.
           </h2>
@@ -79,8 +89,9 @@ export default function LoginPage() {
         <div style={{ width: '100%', maxWidth: 400 }}>
 
           {/* Mobile logo */}
-          <Link href="/" style={{ fontWeight: 800, fontSize: 17, color: '#fff', textDecoration: 'none', letterSpacing: '-0.03em', display: 'block', marginBottom: 40 }} className="cr-mobile-logo">
-            Construct<span style={{ color: '#f4a261' }}>Rent</span>
+          <Link href="/" style={{ fontSize: 17, display: 'inline-flex', marginBottom: 40 }} className="brand-logo cr-mobile-logo">
+            <span className="brand-logo-mark" aria-hidden="true" />
+            Construct<span className="brand-logo-accent">Rent</span>
           </Link>
 
           <div style={{ marginBottom: 36 }}>
@@ -136,7 +147,7 @@ export default function LoginPage() {
           </form>
 
           <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 28 }}>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" style={{ color: '#f4a261', fontWeight: 600, textDecoration: 'none' }}>Create one free</Link>
           </p>
         </div>
@@ -151,5 +162,13 @@ export default function LoginPage() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="ui-page-shell" />}>
+      <LoginPageContent />
+    </Suspense>
   )
 }

@@ -1,21 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { bookingConfirmationEmail } from '@/lib/emails/bookingConfirmation'
+import { getServerEnv } from '@/lib/env'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+interface SendEmailPayload {
+  to: string
+  userName: string
+  equipmentName: string
+  startDate: string
+  endDate: string
+  totalAmount: number
+  days: number
+  bookingId: string
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const resend = new Resend(getServerEnv().resendApiKey)
+    const body = (await request.json()) as Partial<SendEmailPayload>
     const { to, userName, equipmentName, startDate, endDate, totalAmount, days, bookingId } = body
+    if (!to || !userName || !equipmentName || !startDate || !endDate || !bookingId) {
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    }
 
     const html = bookingConfirmationEmail({
       userName,
       equipmentName,
       startDate,
       endDate,
-      totalAmount,
-      days,
+      totalAmount: Number(totalAmount || 0),
+      days: Number(days || 0),
       bookingId,
     })
 
@@ -31,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, id: data?.id })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
   }
 }

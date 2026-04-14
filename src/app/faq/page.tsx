@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { CALL_NUMBER } from '@/lib/constants'
 
 const FAQS = [
   {
@@ -83,7 +84,7 @@ export default function FAQPage() {
   const totalQuestions = FAQS.reduce((s, c) => s + c.questions.length, 0)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
       {/* Header */}
@@ -109,7 +110,7 @@ export default function FAQPage() {
             onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.4)')}
             onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')} />
           {search && (
-            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4 }}>
+            <button onClick={() => setSearch('')} aria-label="Clear search" style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4 }}>
               <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           )}
@@ -163,7 +164,7 @@ export default function FAQPage() {
             <Link href="/contact" style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '12px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 14 }}>
               Contact Us →
             </Link>
-            <a href="tel:+919876543210" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', fontWeight: 600, padding: '12px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 14, border: '1px solid rgba(255,255,255,0.1)' }}>
+            <a href={`tel:${CALL_NUMBER}`} style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', fontWeight: 600, padding: '12px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 14, border: '1px solid rgba(255,255,255,0.1)' }}>
               Call Us
             </a>
           </div>

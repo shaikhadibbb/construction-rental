@@ -1,10 +1,4 @@
-type Review = {
-  id: string
-  rating: number
-  comment: string
-  created_at: string
-  profiles: { email: string } | null
-}
+import type { Review } from '@/types'
 
 function StarRating({ rating, size = 'sm' }: { rating: number, size?: 'sm' | 'lg' }) {
   const s = size === 'lg' ? 'w-6 h-6' : 'w-4 h-4'

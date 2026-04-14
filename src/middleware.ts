@@ -1,19 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-/**
- * Route protection middleware.
- * Protects /admin, /dashboard, /profile — redirects to /login if unauthenticated.
- * Admin role enforcement is done inside the admin layout (DB check).
- */
-export default async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const response = NextResponse.next({
-    request: { headers: request.headers },
-  })
+  const response = NextResponse.next({ request: { headers: request.headers } })
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -29,15 +25,10 @@ export default async function proxy(request: NextRequest) {
     },
   })
 
-  // Refresh the session (important — do not remove)
   const { data: { user } } = await supabase.auth.getUser()
+  const protectedPath = pathname.startsWith('/admin') || pathname.startsWith('/dashboard') || pathname.startsWith('/profile')
 
-  const isProtected =
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/profile')
-
-  if (isProtected && !user) {
+  if (protectedPath && !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
@@ -47,9 +38,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/admin/:path*',
-    '/dashboard/:path*',
-    '/profile/:path*',
-  ],
+  matcher: ['/admin/:path*', '/dashboard/:path*', '/profile/:path*'],
 }

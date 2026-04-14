@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
 import { supabase } from '@/lib/supabase'
+import { SITE_URL } from '@/lib/constants'
 
-const BASE_URL = 'https://constructionrental.vercel.app'
+const BASE_URL = SITE_URL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages

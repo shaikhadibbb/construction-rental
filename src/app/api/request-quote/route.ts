@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { ADMIN_EMAIL, CALL_NUMBER, SITE_URL } from '@/lib/constants'
+import { getServerEnv } from '@/lib/env'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, phone, equipment, start_date, end_date, message } = await request.json()
+    const resend = new Resend(getServerEnv().resendApiKey)
+    const { name, email, phone, equipment, start_date, end_date, message } = (await request.json()) as {
+      name?: string
+      email?: string
+      phone?: string
+      equipment?: string
+      start_date?: string
+      end_date?: string
+      message?: string
+    }
+    if (!name || !email || !equipment) {
+      return NextResponse.json({ error: 'Name, email, and equipment are required' }, { status: 400 })
+    }
 
     // ── 1. Admin notification email ──
     await resend.emails.send({
       from: 'ConstructRent <onboarding@resend.dev>',
-      to: ['adibazam123@gmail.com'],
+      to: [ADMIN_EMAIL],
       subject: `🏗️ New Quote Request: ${equipment}`,
       html: `
         <!DOCTYPE html>
@@ -74,7 +86,7 @@ export async function POST(request: NextRequest) {
                 <!-- CTA -->
                 <tr>
                   <td style="padding:0 40px 32px">
-                    <a href="https://constructionrental.vercel.app/admin/bookings"
+                    <a href="${SITE_URL}/admin/bookings"
                       style="display:inline-block;background:#eab308;color:#0a1628;font-weight:900;font-size:15px;padding:14px 28px;border-radius:12px;text-decoration:none">
                       View in Admin Panel →
                     </a>
@@ -179,7 +191,7 @@ export async function POST(request: NextRequest) {
                   <!-- CTA -->
                   <tr>
                     <td style="padding:0 40px 32px;text-align:center">
-                      <a href="https://constructionrental.vercel.app/catalog"
+                      <a href="${SITE_URL}/catalog"
                         style="display:inline-block;background:#eab308;color:#0a1628;font-weight:900;font-size:15px;padding:14px 32px;border-radius:12px;text-decoration:none">
                         Browse More Equipment →
                       </a>
@@ -190,7 +202,7 @@ export async function POST(request: NextRequest) {
                   <tr>
                     <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 40px;text-align:center">
                       <p style="margin:0 0 8px;color:#374151;font-size:13px;font-weight:600">Need urgent help?</p>
-                      <p style="margin:0;color:#9ca3af;font-size:13px">📞 +91 98765 43210 · ✉️ adibazam123@gmail.com</p>
+                      <p style="margin:0;color:#9ca3af;font-size:13px">📞 ${CALL_NUMBER} · ✉️ ${ADMIN_EMAIL}</p>
                       <p style="margin:16px 0 0;color:#d1d5db;font-size:11px">© 2026 ConstructRent · Mumbai, Maharashtra</p>
                     </td>
                   </tr>

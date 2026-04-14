@@ -24,10 +24,11 @@ export default async function AdminDashboardPage() {
   const recentBookings = bookings.slice(0, 5)
 
   const cardStyle: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.07)',
+    background: 'var(--surface-0)',
+    border: '1px solid var(--border-subtle)',
     borderRadius: 16,
     padding: '24px',
+    boxShadow: 'var(--shadow-soft)',
   }
 
   return (
@@ -36,7 +37,7 @@ export default async function AdminDashboardPage() {
       <div>
         <p style={{ fontSize: 11, color: '#f4a261', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>Overview</p>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Dashboard</h1>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Welcome back. Here is what is happening with ConstructRent today.</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Welcome back. Here is what is happening with ConstructRent today.</p>
       </div>
 
       {/* KPI Grid */}
@@ -124,7 +125,7 @@ export default async function AdminDashboardPage() {
           {/* System Status */}
           <div style={{ ...cardStyle, background: 'linear-gradient(135deg, rgba(8,8,8,1) 0%, rgba(20,20,20,1) 100%)' }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>System Status</h2>
-            <div style={{ display: 'flex', itemsCenter: 'center', gap: 10, padding: '10px 14px', background: 'rgba(74,222,128,0.05)', border: '1px solid rgba(74,222,128,0.1)', borderRadius: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(74,222,128,0.05)', border: '1px solid rgba(74,222,128,0.1)', borderRadius: 10 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', animation: 'pulse-dot 2s infinite' }} />
               <span style={{ fontSize: 12, fontWeight: 600, color: '#4ade80' }}>All systems operational</span>
             </div>

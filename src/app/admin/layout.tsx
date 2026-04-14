@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import type { User } from '@supabase/supabase-js'
 
 const NAV_LINKS = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -22,6 +23,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [checking, setChecking] = useState(true)
 
+  const hasAdminRole = (user: User, profile: { role?: string | null; is_admin?: boolean | null } | null) => {
+    const profileAdmin = profile?.role?.toLowerCase() === 'admin' || profile?.is_admin === true
+    const metaRole = (user.app_metadata?.role ?? user.user_metadata?.role ?? '') as string
+    const metaAdmin = metaRole.toLowerCase() === 'admin' || user.app_metadata?.is_admin === true
+    return profileAdmin || metaAdmin
+  }
+
   useEffect(() => {
     const checkAdmin = async () => {
       try {
@@ -30,13 +38,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, is_admin')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
-        if (error || !profile || profile.role !== 'admin') {
+        const isAdmin = hasAdminRole(user, profile)
+
+        // If profile exists and clearly does not have admin role, block access.
+        // If profile is missing / schema differs / RLS blocks profile read, avoid false negatives.
+        if (!isAdmin && profile) {
           router.push('/')
           return
+        }
+
+        if (error) {
+          const benignProfileError =
+            error.code === 'PGRST116' ||
+            /is_admin/.test(error.message) ||
+            /permission denied/i.test(error.message)
+          if (!benignProfileError) {
+            router.push('/')
+            return
+          }
         }
 
         setChecking(false)

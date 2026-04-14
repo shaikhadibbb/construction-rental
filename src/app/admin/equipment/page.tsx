@@ -70,8 +70,8 @@ export default function AdminEquipmentPage() {
 
   const available = equipment.filter(e => e.is_available).length
 
-  const cell: React.CSSProperties = { padding: '14px 20px', fontSize: 13, color: 'rgba(255,255,255,0.7)', borderBottom: '1px solid rgba(255,255,255,0.05)' }
-  const thStyle: React.CSSProperties = { padding: '12px 20px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.07)' }
+  const cell: React.CSSProperties = { padding: '14px 20px', fontSize: 13, color: 'rgba(255,255,255,0.7)', borderBottom: '1px solid var(--border-subtle)' }
+  const thStyle: React.CSSProperties = { padding: '12px 20px', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 240 }}>

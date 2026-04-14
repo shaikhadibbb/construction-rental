@@ -7,13 +7,13 @@
 export interface Equipment {
   id: string
   name: string
-  description: string
+  description?: string
   category: string
   daily_rate: number
-  image_url: string
-  images: string[]
+  image_url?: string
+  images?: string[]
   is_available: boolean
-  created_at: string
+  created_at?: string
 }
 
 /** Booking record from the `bookings` table */
@@ -45,11 +45,12 @@ export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled'
 /** User profile from the `profiles` table */
 export interface Profile {
   id: string
-  email: string
+  email?: string
   full_name?: string
   phone?: string
-  role: 'user' | 'admin'
-  created_at: string
+  role?: 'user' | 'admin'
+  is_admin?: boolean
+  created_at?: string
 }
 
 /** Review from the `reviews` table */

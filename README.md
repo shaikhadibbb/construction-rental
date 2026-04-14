@@ -197,7 +197,7 @@ src/
 
 1. Create a user via Supabase Auth (email/password).
 2. In the `profiles` table, set `role = 'admin'` for that user's row.
-3. Navigate to `/admin` — the layout verifies the role before rendering.
+3. Navigate to `/admin` — middleware validates auth session and admin role before route access.
 
 ---
 

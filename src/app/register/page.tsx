@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { pushToast } from '@/lib/toast'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -22,21 +23,27 @@ export default function RegisterPage() {
       email, password,
       options: { data: { full_name: fullName } }
     })
-    if (error) { setError(error.message); setLoading(false) }
-    else { router.push('/dashboard') }
+    if (error) {
+      setError(error.message)
+      pushToast({ title: 'Registration failed', description: error.message, variant: 'error' })
+      setLoading(false)
+    } else {
+      pushToast({ title: 'Account created', description: 'Welcome to ConstructRent.', variant: 'success' })
+      router.push('/dashboard')
+    }
   }
 
   const input: React.CSSProperties = {
     width: '100%', padding: '13px 16px',
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'var(--surface-1)',
+    border: '1px solid var(--border-subtle)',
     borderRadius: 10, fontSize: 15, color: '#e8e8e8',
     outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
     transition: 'border-color 0.2s',
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ display: 'flex', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
 
       {/* Grid texture */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
@@ -45,8 +52,9 @@ export default function RegisterPage() {
       <div style={{ display: 'none', width: '50%', flexDirection: 'column', justifyContent: 'space-between', padding: '48px', borderRight: '1px solid rgba(255,255,255,0.06)', position: 'relative', zIndex: 1 }} className="cr-left-panel">
         <div style={{ position: 'absolute', top: '20%', right: 0, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(244,162,97,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-        <Link href="/" style={{ fontWeight: 800, fontSize: 17, color: '#fff', textDecoration: 'none', letterSpacing: '-0.03em', position: 'relative', zIndex: 1 }}>
-          Construct<span style={{ color: '#f4a261' }}>Rent</span>
+        <Link href="/" className="brand-logo" style={{ fontSize: 17, position: 'relative', zIndex: 1 }}>
+          <span className="brand-logo-mark" aria-hidden="true" />
+          Construct<span className="brand-logo-accent">Rent</span>
         </Link>
 
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -69,7 +77,7 @@ export default function RegisterPage() {
               ))}
             </div>
             <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, fontStyle: 'italic', marginBottom: 16 }}>
-              "Booked an excavator in under 3 minutes. The process was seamless and the equipment was in perfect condition."
+              &ldquo;Booked an excavator in under 3 minutes. The process was seamless and the equipment was in perfect condition.&rdquo;
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #f4a261, #e76f51)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, color: '#fff', flexShrink: 0 }}>R</div>
@@ -88,8 +96,9 @@ export default function RegisterPage() {
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', position: 'relative', zIndex: 1 }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
 
-          <Link href="/" style={{ fontWeight: 800, fontSize: 17, color: '#fff', textDecoration: 'none', letterSpacing: '-0.03em', display: 'block', marginBottom: 40 }} className="cr-mobile-logo">
-            Construct<span style={{ color: '#f4a261' }}>Rent</span>
+          <Link href="/" style={{ fontSize: 17, display: 'inline-flex', marginBottom: 40 }} className="brand-logo cr-mobile-logo">
+            <span className="brand-logo-mark" aria-hidden="true" />
+            Construct<span className="brand-logo-accent">Rent</span>
           </Link>
 
           <div style={{ marginBottom: 36 }}>

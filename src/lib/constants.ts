@@ -3,17 +3,19 @@
  * Import from here instead of hardcoding strings in components.
  */
 
+import { publicEnv } from './env'
+
 /** WhatsApp number in international format without '+' (for wa.me links) */
-export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919876543210'
+export const WHATSAPP_NUMBER = publicEnv.whatsappNumber
 
 /** Call number with country code (for tel: links) */
-export const CALL_NUMBER = process.env.NEXT_PUBLIC_CALL_NUMBER ?? '+919876543210'
+export const CALL_NUMBER = publicEnv.callNumber
 
 /** Admin / support email */
-export const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? 'hello@constructrent.in'
+export const ADMIN_EMAIL = publicEnv.adminEmail
 
 /** Site base URL */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://constructrent.in'
+export const SITE_URL = publicEnv.siteUrl
 
 /** Pre-encoded default WhatsApp message */
 export const WHATSAPP_MSG = encodeURIComponent(

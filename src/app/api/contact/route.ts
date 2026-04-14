@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { ADMIN_EMAIL } from '@/lib/constants'
+import { getServerEnv } from '@/lib/env'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, subject, message } = await request.json()
+    const resend = new Resend(getServerEnv().resendApiKey)
+    const { name, email, subject, message } = (await request.json()) as {
+      name?: string
+      email?: string
+      subject?: string
+      message?: string
+    }
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: 'Name, email and message are required' }, { status: 400 })
@@ -13,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     await resend.emails.send({
       from: 'ConstructRent Contact <onboarding@resend.dev>',
-      to: ['adibazam123@gmail.com'],
+      to: [ADMIN_EMAIL],
       subject: 'Contact Form: ' + subject,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -26,7 +32,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
   }
 }

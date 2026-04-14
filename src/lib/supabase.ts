@@ -1,8 +1,8 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
-import { env } from './env'
+import { publicEnv } from './env'
 
-const { supabaseUrl, supabaseAnonKey } = env
+const { supabaseUrl, supabaseAnonKey } = publicEnv
 
 /**
  * Browser/client-side Supabase client.

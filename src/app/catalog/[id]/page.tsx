@@ -6,7 +6,9 @@ import ReviewsList from '@/components/ui/ReviewsList'
 import ImageGallery from '@/components/ui/ImageGallery'
 import QuoteForm from '@/components/ui/QuoteForm'
 import { CALL_NUMBER } from '@/lib/constants'
-import type { Review, Equipment } from '@/types'
+import type { Review } from '@/types'
+
+export const revalidate = 300
 
 /**
  * Equipment Detail Page - Dynamic Route ([id])
@@ -46,13 +48,13 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
     ? (typedReviews.reduce((sum, r) => sum + (r.rating || 5), 0) / typedReviews.length).toFixed(1)
     : null
 
-  const surfaceStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 24, padding: '24px' }
+  const surfaceStyle: React.CSSProperties = { background: 'var(--surface-0)', border: '1px solid var(--border-subtle)', borderRadius: 24, padding: '24px', boxShadow: 'var(--shadow-soft)' }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8' }}>
+    <div className="ui-page-shell">
 
       {/* Breadcrumb Bar */}
-      <div style={{ background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ background: 'var(--surface-0)', borderBottom: '1px solid var(--border-subtle)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px' }}>
           <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
             <Link href="/" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>Home</Link>
@@ -133,7 +135,7 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
 
             {/* Reviews Section */}
             <div style={surfaceStyle}>
-              <div style={{ display: 'flex', alignItems: 'center', justify: 'space-between', marginBottom: 32 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
                 <div>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>Customer Feedback</h2>
                   <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{typedReviews.length} verified reviews</p>

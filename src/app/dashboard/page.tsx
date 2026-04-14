@@ -23,7 +23,10 @@ export default function DashboardPage() {
   const router = useRouter()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
-  const [justBooked, setJustBooked] = useState(false)
+  const [justBooked] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return new URLSearchParams(window.location.search).get('booked') === 'true'
+  })
   const [user, setUser] = useState<User | null>(null)
   const [filter, setFilter] = useState('all')
 
@@ -38,8 +41,6 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('booked') === 'true') setJustBooked(true)
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.push('/login'); return }
       setUser(user)
@@ -68,7 +69,7 @@ export default function DashboardPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="ui-page-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: 40, height: 40, border: '3px solid rgba(244,162,97,0.3)', borderTopColor: '#f4a261', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 16px' }} />
         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>Loading your dashboard...</p>
@@ -78,11 +79,11 @@ export default function DashboardPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
       {/* Header */}
-      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 40px', position: 'relative', zIndex: 1 }}>
+      <div style={{ borderBottom: '1px solid var(--border-subtle)', padding: '56px 24px 40px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
             <div>
@@ -122,7 +123,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <p style={{ fontWeight: 700, color: '#4ade80', fontSize: 14 }}>Quote request submitted!</p>
-              <p style={{ color: 'rgba(74,222,128,0.6)', fontSize: 13 }}>We'll get back to you within 2 hours with pricing details.</p>
+              <p style={{ color: 'rgba(74,222,128,0.6)', fontSize: 13 }}>We&apos;ll get back to you within 2 hours with pricing details.</p>
             </div>
           </div>
         )}
@@ -209,7 +210,7 @@ export default function DashboardPage() {
                       </div>
 
                       {booking.notes && (
-                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginTop: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px', fontStyle: 'italic' }}>"{booking.notes}"</p>
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginTop: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px', fontStyle: 'italic' }}>&ldquo;{booking.notes}&rdquo;</p>
                       )}
                     </div>
 
