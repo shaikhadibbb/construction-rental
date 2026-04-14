@@ -70,7 +70,7 @@ export default function CatalogPage() {
             onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.4)')}
             onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')} />
           {search && (
-            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4 }}>
+            <button onClick={() => setSearch('')} aria-label="Clear search" style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4 }}>
               <svg style={{ width: 16, height: 16 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           )}
@@ -112,6 +112,9 @@ export default function CatalogPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Available only</p>
                   <button onClick={() => setAvailableOnly(!availableOnly)}
+                    role="switch"
+                    aria-checked={availableOnly}
+                    aria-label="Show available equipment only"
                     style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', transition: 'background 0.2s', background: availableOnly ? '#f4a261' : 'rgba(255,255,255,0.1)', position: 'relative', flexShrink: 0 }}>
                     <span style={{ position: 'absolute', top: 2, left: availableOnly ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
                   </button>

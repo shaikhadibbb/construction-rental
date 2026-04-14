@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import EquipmentForm, { EquipmentFormData } from '@/components/ui/EquipmentForm'
+import EquipmentForm from '@/components/ui/EquipmentForm'
+import type { EquipmentFormData } from '@/types'
 import { deleteEquipment, saveEquipment } from '../actions'
 
 export default function EditEquipmentPage() {
@@ -38,54 +39,64 @@ export default function EditEquipmentPage() {
 
   const handleSave = async (data: EquipmentFormData) => {
     setSaving(true)
-    await saveEquipment(id, {
-      name: data.name, description: data.description, category: data.category,
-      daily_rate: Number(data.daily_rate),
-      image_url: data.image_url || data.images[0] || '',
-      images: data.images, is_available: data.is_available,
-    })
-    setSaving(false)
-    setSuccess(true)
-    setTimeout(() => router.push('/admin/equipment'), 1500)
+    try {
+      await saveEquipment(id, {
+        name: data.name, description: data.description, category: data.category,
+        daily_rate: Number(data.daily_rate),
+        image_url: data.image_url || data.images[0] || '',
+        images: data.images, is_available: data.is_available,
+      })
+      setSuccess(true)
+      setTimeout(() => router.push('/admin/equipment'), 1200)
+    } catch (err) {
+      console.error(err)
+      alert('Failed to save')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDelete = async () => {
     if (!confirm('Delete this equipment? This cannot be undone.')) return
-    await deleteEquipment(id)
-    router.push('/admin/equipment')
+    try {
+      await deleteEquipment(id)
+      router.push('/admin/equipment')
+    } catch (err) {
+      console.error(err)
+      alert('Failed to delete')
+    }
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-gray-400 text-sm">Loading equipment...</p>
-      </div>
+    <div style={{ padding: '60px', textAlign: 'center' }}>
+      <div style={{ width: 32, height: 32, border: '3px solid rgba(244,162,97,0.3)', borderTopColor: '#f4a261', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
+      <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Fetching asset data…</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <Link href="/admin/equipment" className="flex items-center gap-1 text-sm text-yellow-600 hover:text-yellow-700 font-semibold mb-4">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          Back to Equipment
+    <div style={{ maxWidth: 640, margin: '0 auto' }}>
+      <div style={{ marginBottom: 32 }}>
+        <Link href="/admin/equipment" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#f4a261', textDecoration: 'none', fontWeight: 700, marginBottom: 16 }}>
+          <span style={{ fontSize: 16 }}>‹</span> Back to Fleet
         </Link>
-        <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-1">Fleet</p>
-        <h1 className="text-3xl font-black text-[#0a1628]">Edit Equipment</h1>
-        <p className="text-gray-400 text-sm mt-1">Update the details for this machine</p>
+        <p style={{ fontSize: 10, color: '#f4a261', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 800, marginBottom: 4 }}>Fleet Manager</p>
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Edit Details</h1>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>Update metadata and availability for this machine.</p>
       </div>
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-6 text-sm font-bold flex items-center gap-2">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-          Saved! Redirecting...
+        <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80', borderRadius: 14, padding: '14px 20px', marginBottom: 24, fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
+          ✅ Changes saved! Redirecting to fleet...
         </div>
       )}
 
-      {initialData && (
-        <EquipmentForm mode="edit" initialData={initialData} saving={saving} onSave={handleSave} onDelete={handleDelete} />
-      )}
+      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '32px' }}>
+        {initialData && (
+          <EquipmentForm mode="edit" initialData={initialData} saving={saving} onSave={handleSave} onDelete={handleDelete} />
+        )}
+      </div>
     </div>
   )
 }

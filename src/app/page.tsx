@@ -1,21 +1,30 @@
-import { supabase } from '@/lib/supabase'
-import Link from 'next/link'
+import { supabaseAnon } from '@/lib/supabase'
 import HomepageClient from '@/components/ui/HomepageClient'
 
+// ISR: revalidate every 5 minutes so fresh equipment shows without a full redeploy
+export const revalidate = 300
+
 export default async function HomePage() {
-  const { data: equipment } = await supabase
-    .from('equipment')
-    .select('*')
-    .eq('is_available', true)
-    .limit(6)
+  const [equipmentResult, totalEquipResult, totalBookingsResult] = await Promise.all([
+    supabaseAnon
+      .from('equipment')
+      .select('id, name, category, daily_rate, image_url, is_available')
+      .eq('is_available', true)
+      .order('created_at', { ascending: false })
+      .limit(6),
+    supabaseAnon
+      .from('equipment')
+      .select('*', { count: 'exact', head: true }),
+    supabaseAnon
+      .from('bookings')
+      .select('*', { count: 'exact', head: true }),
+  ])
 
-  const { count: totalEquipment } = await supabase
-    .from('equipment')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: totalBookings } = await supabase
-    .from('bookings')
-    .select('*', { count: 'exact', head: true })
-
-  return <HomepageClient equipment={equipment || []} totalEquipment={totalEquipment || 0} totalBookings={totalBookings || 0} />
+  return (
+    <HomepageClient
+      equipment={equipmentResult.data || []}
+      totalEquipment={totalEquipResult.count || 0}
+      totalBookings={totalBookingsResult.count || 0}
+    />
+  )
 }

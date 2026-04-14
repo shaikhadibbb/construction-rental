@@ -3,34 +3,19 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
+import type { Booking, BookingStatus } from '@/types'
+import type { User } from '@supabase/supabase-js'
 
-type Booking = {
-  id: string
-  start_date: string
-  end_date: string
-  total_amount: number
-  status: string
-  created_at: string
-  customer_name?: string
-  equipment_name?: string
-  notes?: string
-  equipment: {
-    name: string
-    category: string
-    image_url: string
-    daily_rate: number
-  }
+const STATUS: Record<BookingStatus, { label: string; color: string; dot: string; pulse?: boolean }> = {
+  pending:   { label: 'Pending Review', color: 'rgba(234,179,8,0.15)',   dot: '#eab308', pulse: true  },
+  confirmed: { label: 'Confirmed',      color: 'rgba(74,222,128,0.12)',  dot: '#4ade80' },
+  cancelled: { label: 'Cancelled',      color: 'rgba(239,68,68,0.12)',   dot: '#f87171' },
+  completed: { label: 'Completed',      color: 'rgba(255,255,255,0.06)', dot: 'rgba(255,255,255,0.3)' },
 }
 
-const STATUS: Record<string, { label: string, color: string, dot: string, pulse?: boolean }> = {
-  pending:   { label: 'Pending Review', color: 'rgba(234,179,8,0.15)', dot: '#eab308', pulse: true },
-  confirmed: { label: 'Confirmed', color: 'rgba(74,222,128,0.12)', dot: '#4ade80' },
-  cancelled: { label: 'Cancelled', color: 'rgba(239,68,68,0.12)', dot: '#f87171' },
-  completed: { label: 'Completed', color: 'rgba(255,255,255,0.06)', dot: 'rgba(255,255,255,0.3)' },
-}
-
-const STATUS_TEXT: Record<string, string> = {
+const STATUS_TEXT: Record<BookingStatus, string> = {
   pending: '#eab308', confirmed: '#4ade80', cancelled: '#f87171', completed: 'rgba(255,255,255,0.4)',
 }
 
@@ -39,7 +24,7 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [justBooked, setJustBooked] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [filter, setFilter] = useState('all')
 
   const fetchBookings = useCallback(async (userId: string) => {
@@ -191,9 +176,9 @@ export default function DashboardPage() {
                   <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
 
                     {/* Image */}
-                    <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', background: '#111', flexShrink: 0 }}>
+                    <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', background: '#111', flexShrink: 0, position: 'relative' }}>
                       {equipImg
-                        ? <img src={equipImg} alt={equipName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? <Image src={equipImg} alt={equipName} fill sizes="72px" style={{ objectFit: 'cover' }} loading="lazy" />
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🚧</div>
                       }
                     </div>

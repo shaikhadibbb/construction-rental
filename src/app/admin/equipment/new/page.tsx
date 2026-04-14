@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import EquipmentForm, { EquipmentFormData } from '@/components/ui/EquipmentForm'
+import EquipmentForm from '@/components/ui/EquipmentForm'
+import type { EquipmentFormData } from '@/types'
 
 export default function NewEquipmentPage() {
   const router = useRouter()
@@ -27,18 +28,19 @@ export default function NewEquipmentPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <Link href="/admin/equipment" className="flex items-center gap-1 text-sm text-yellow-600 hover:text-yellow-700 font-semibold mb-4">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          Back to Equipment
+    <div style={{ maxWidth: 640, margin: '0 auto' }}>
+      <div style={{ marginBottom: 32 }}>
+        <Link href="/admin/equipment" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#f4a261', textDecoration: 'none', fontWeight: 700, marginBottom: 16 }}>
+          <span style={{ fontSize: 16 }}>‹</span> Back to Fleet
         </Link>
-        <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-1">Fleet</p>
-        <h1 className="text-3xl font-black text-[#0a1628]">Add New Equipment</h1>
-        <p className="text-gray-400 text-sm mt-1">Fill in the details to list a new machine in your catalog</p>
+        <p style={{ fontSize: 10, color: '#f4a261', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 800, marginBottom: 4 }}>Inventory</p>
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Add New Asset</h1>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>List a new machine in your rental catalog.</p>
       </div>
 
-      <EquipmentForm mode="new" saving={saving} onSave={handleSave} />
+      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '32px' }}>
+        <EquipmentForm mode="new" saving={saving} onSave={handleSave} />
+      </div>
     </div>
   )
 }

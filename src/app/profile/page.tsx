@@ -4,19 +4,22 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
+import type { User } from '@supabase/supabase-js'
+import type { Booking, Profile } from '@/types'
 
-const STATUS_CONFIG: Record<string, { classes: string, dot: string }> = {
-  pending:   { classes: 'bg-yellow-50 text-yellow-700 border border-yellow-200', dot: 'bg-yellow-500 animate-pulse' },
-  confirmed: { classes: 'bg-green-50 text-green-700 border border-green-200', dot: 'bg-green-500' },
-  cancelled: { classes: 'bg-red-50 text-red-600 border border-red-200', dot: 'bg-red-500' },
-  completed: { classes: 'bg-gray-100 text-gray-600 border border-gray-200', dot: 'bg-gray-400' },
+const STATUS_CONFIG: Record<string, { bg: string, color: string, dot: string }> = {
+  pending:   { bg: 'rgba(234,179,8,0.1)',   color: '#eab308', dot: '#eab308' },
+  confirmed: { bg: 'rgba(74,222,128,0.1)',  color: '#4ade80', dot: '#4ade80' },
+  cancelled: { bg: 'rgba(239,68,68,0.1)',   color: '#f87171', dot: '#f87171' },
+  completed: { bg: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', dot: 'rgba(255,255,255,0.3)' },
 }
 
 export default function ProfilePage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
-  const [bookings, setBookings] = useState<any[]>([])
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [bookings, setBookings] = useState<Booking[]>([])
   const [fullName, setFullName] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -33,13 +36,14 @@ export default function ProfilePage() {
       const { data: bookings } = await supabase
         .from('bookings').select('*, equipment(name, image_url, category)')
         .eq('user_id', user.id).order('created_at', { ascending: false }).limit(5)
-      setBookings(bookings || [])
+      setBookings((bookings as Booking[]) || [])
       setLoading(false)
     }
     fetchAll()
   }, [router])
 
   const handleSave = async () => {
+    if (!user) return
     setSaving(true)
     await supabase.from('profiles').update({ full_name: fullName }).eq('id', user.id)
     setSaved(true)
@@ -48,154 +52,125 @@ export default function ProfilePage() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-gray-400 text-sm">Loading profile...</p>
+    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 36, height: 36, border: '3px solid rgba(244,162,97,0.3)', borderTopColor: '#f4a261', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Loading profile…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
   )
 
-  const inputClass = "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent focus:bg-white transition-colors"
-  const memberSince = new Date(user?.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  const memberSince = user ? new Date(user.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
   const initials = (fullName || user?.email || '?')[0].toUpperCase()
 
-  return (
-    <div className="min-h-screen bg-gray-50">
+  const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '24px' }
+  const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '12px 16px', fontSize: 14, color: '#fff', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box', fontFamily: 'inherit' }
+  const labelStyle: React.CSSProperties = { display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }
 
-      {/* Header */}
-      <div className="bg-[#0a1628]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-yellow-500 flex items-center justify-center text-[#0a1628] text-2xl font-black flex-shrink-0">
+  return (
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8' }}>
+
+      {/* Hero Header */}
+      <div style={{ background: 'linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(8,8,8,1) 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '60px 24px 40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 40 }}>
+            <div style={{ width: 80, height: 80, borderRadius: 24, background: '#f4a261', color: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900, flexShrink: 0, boxShadow: '0 10px 30px rgba(244,162,97,0.2)' }}>
               {initials}
             </div>
             <div>
-              <p className="text-yellow-500 text-xs font-bold tracking-widest uppercase mb-1">My Account</p>
-              <h1 className="text-2xl font-black text-white">{fullName || 'No name set'}</h1>
-              <p className="text-gray-400 text-sm mt-0.5">{user?.email}</p>
-            </div>
-            <div className="ml-auto hidden sm:block">
-              <span className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-bold px-3 py-1.5 rounded-full capitalize">
-                {profile?.role || 'Customer'}
-              </span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#f4a261', textTransform: 'uppercase', letterSpacing: '0.15em', display: 'block', marginBottom: 6 }}>Account Profile</span>
+              <h1 style={{ fontSize: 32, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', marginBottom: 6 }}>{fullName || 'Contractor'}</h1>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {user?.email}
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+                Joined {new Date(user?.created_at || '').getFullYear()}
+              </p>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-8">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             {[
-              { label: 'Total Bookings', value: bookings.length },
-              { label: 'Active Rentals', value: bookings.filter(b => b.status === 'confirmed').length },
-              { label: 'Member Since', value: new Date(user?.created_at).getFullYear() },
+              { label: 'Total Quotes', value: bookings.length },
+              { label: 'Verified', value: profile?.role === 'admin' ? 'Admin' : 'Customer' },
+              { label: 'Active', value: bookings.filter(b => b.status === 'confirmed').length },
             ].map(stat => (
-              <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                <p className="text-xl font-black text-white">{stat.value}</p>
-                <p className="text-gray-400 text-xs mt-0.5">{stat.label}</p>
+              <div key={stat.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '16px', textAlign: 'center' }}>
+                <p style={{ fontSize: 20, fontWeight: 900, color: '#fff', marginBottom: 2 }}>{stat.value}</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '48px 24px 80px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {/* Profile form */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h2 className="font-black text-[#0a1628]">Profile Information</h2>
+        {/* Profile Settings */}
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+            <span style={{ fontSize: 18 }}>⚙️</span>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>General Settings</h2>
           </div>
-
-          <div className="space-y-4">
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Full Name</label>
-              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
-                placeholder="Enter your full name" className={inputClass} />
+              <label style={labelStyle}>Display Name</label>
+              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Enter your full name" style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.5)')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Email Address</label>
-              <input type="text" value={user?.email} disabled
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-400 cursor-not-allowed" />
-              <p className="text-xs text-gray-400 mt-1.5">Email address cannot be changed</p>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">Member Since</label>
-              <input type="text" value={memberSince} disabled
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-400 cursor-not-allowed" />
+              <label style={labelStyle}>Email Address (Protected)</label>
+              <input type="text" value={user?.email} disabled style={{ ...inputStyle, background: 'rgba(0,0,0,0.2)', color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }} />
             </div>
 
             {saved && (
-              <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                Profile updated successfully!
+              <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80', borderRadius: 12, padding: '12px 16px', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                ✅ Profile updated successfully!
               </div>
             )}
 
             <button onClick={handleSave} disabled={saving}
-              className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-200 disabled:text-gray-400 text-[#0a1628] font-black px-6 py-3 rounded-xl transition-all hover:scale-[1.01] text-sm">
-              {saving ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-[#0a1628] border-t-transparent rounded-full animate-spin" />
-                  Saving...
-                </span>
-              ) : 'Save Changes'}
+              style={{ width: 'fit-content', background: '#f4a261', color: '#0a0a0a', fontWeight: 800, fontSize: 14, padding: '12px 28px', borderRadius: 12, border: 'none', cursor: 'pointer', transition: 'all 0.2s', marginTop: 4 }}>
+              {saving ? 'Saving…' : 'Save Profile'}
             </button>
           </div>
         </div>
 
-        {/* Recent bookings */}
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h2 className="font-black text-[#0a1628]">Recent Bookings</h2>
-            </div>
-            <Link href="/dashboard" className="text-xs font-bold text-yellow-600 hover:text-yellow-700 flex items-center gap-1">
-              View all
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </Link>
+        {/* Recent Bookings */}
+        <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '24px', display: 'flex', alignItems: 'center', justify: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>Recent Activity</h2>
+            <Link href="/dashboard" style={{ fontSize: 12, color: '#f4a261', fontWeight: 700, textDecoration: 'none' }}>Full Dashboard →</Link>
           </div>
 
           {bookings.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <p className="text-3xl mb-2">📋</p>
-              <p className="font-medium text-gray-600 text-sm">No bookings yet</p>
-              <Link href="/catalog" className="text-yellow-600 text-sm font-bold mt-2 inline-block hover:text-yellow-700">
-                Browse equipment →
-              </Link>
+            <div style={{ padding: '60px 24px', textAlign: 'center' }}>
+              <p style={{ fontSize: 32, marginBottom: 12 }}>📋</p>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>No bookings found. Ready to start your next project?</p>
+              <Link href="/catalog" style={{ display: 'inline-block', marginTop: 16, fontSize: 13, color: '#f4a261', fontWeight: 700, textDecoration: 'none' }}>Browse Equipment 🚧</Link>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {bookings.map(booking => {
                 const status = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending
                 const equipName = booking.equipment_name || booking.equipment?.name || 'Equipment'
+                const equipImg = booking.equipment?.image_url
                 return (
-                  <div key={booking.id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      {booking.equipment?.image_url ? (
-                        <img src={booking.equipment.image_url} alt={equipName} className="w-full h-full object-cover" />
+                  <div key={booking.id} style={{ padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16, borderBottom: '1px solid rgba(255,255,255,0.03)', background: 'rgba(255,255,255,0.01)' }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 12, overflow: 'hidden', background: '#111', flexShrink: 0, position: 'relative' }}>
+                      {equipImg ? (
+                        <Image src={equipImg} alt={equipName} fill sizes="48px" style={{ objectFit: 'cover' }} />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl">🚧</div>
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🚧</div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-sm truncate">{equipName}</p>
-                      <p className="text-xs text-gray-400 capitalize">{booking.equipment?.category || 'Equipment'}</p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 2, truncate: 'true' }}>{equipName}</p>
+                      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'capitalize' }}>{booking.equipment?.category || 'Machine'}</p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${status.classes}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: status.color, background: status.bg, padding: '4px 10px', borderRadius: 100, border: `1px solid ${status.bg}`, letterSpacing: '0.04em' }}>
                         {booking.status}
                       </span>
                     </div>
@@ -206,22 +181,26 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Quick links */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Action Widgets */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
           <Link href="/dashboard"
-            className="bg-[#0a1628] hover:bg-[#0d1e35] rounded-2xl p-5 flex items-center gap-3 transition-colors">
-            <span className="text-2xl">📋</span>
+            style={{ ...cardStyle, flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16, transition: 'all 0.2s' }}
+            onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+            onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}>
+            <span style={{ fontSize: 28 }}>⚡</span>
             <div>
-              <p className="font-black text-white text-sm">My Dashboard</p>
-              <p className="text-gray-400 text-xs">All bookings</p>
+              <p style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>My Dashboard</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Manage rentals</p>
             </div>
           </Link>
           <Link href="/catalog"
-            className="bg-yellow-500 hover:bg-yellow-400 rounded-2xl p-5 flex items-center gap-3 transition-colors">
-            <span className="text-2xl">🚧</span>
+            style={{ ...cardStyle, flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 16, transition: 'all 0.2s' }}
+            onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+            onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}>
+            <span style={{ fontSize: 28 }}>🏗️</span>
             <div>
-              <p className="font-black text-[#0a1628] text-sm">Browse Equipment</p>
-              <p className="text-[#0a1628]/60 text-xs">50+ machines</p>
+              <p style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>New Rental</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Rent equipment</p>
             </div>
           </Link>
         </div>

@@ -1,23 +1,24 @@
+'use client'
+
+import Image from 'next/image'
 import Link from 'next/link'
+import type { Equipment } from '@/types'
 
-type Equipment = {
-  id: string
-  name: string
-  description: string
-  category: string
-  daily_rate: number
-  image_url: string
-  is_available: boolean
-}
-
+/**
+ * Equipment card displayed in the catalog grid.
+ * Uses Next.js Image for optimised loading with Supabase storage URLs.
+ *
+ * @param equipment - The equipment record to display
+ */
 export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
   return (
-    <Link href={'/catalog/' + equipment.id} style={{ textDecoration: 'none', display: 'block' }}>
-      <div style={{
-        border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden',
-        background: 'rgba(255,255,255,0.02)', transition: 'all 0.25s',
-        display: 'flex', flexDirection: 'column', cursor: 'pointer',
-      }}
+    <Link href={`/catalog/${equipment.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <div
+        style={{
+          border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden',
+          background: 'rgba(255,255,255,0.02)', transition: 'all 0.25s',
+          display: 'flex', flexDirection: 'column', cursor: 'pointer', height: '100%',
+        }}
         onMouseOver={e => {
           e.currentTarget.style.border = '1px solid rgba(244,162,97,0.25)'
           e.currentTarget.style.transform = 'translateY(-3px)'
@@ -29,16 +30,25 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
           e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
         }}>
 
-        <div style={{ position: 'relative', aspectRatio: '16/9', background: '#111', overflow: 'hidden' }}>
+        {/* Image area */}
+        <div style={{ position: 'relative', aspectRatio: '16/9', background: '#111', overflow: 'hidden', flexShrink: 0 }}>
           {equipment.image_url ? (
-            <img src={equipment.image_url} alt={equipment.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} />
+            <Image
+              src={equipment.image_url}
+              alt={equipment.name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }}
+              loading="lazy"
+            />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🚧</div>
           )}
+          {/* Availability badge */}
           <span style={{
-            position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700,
-            padding: '4px 10px', borderRadius: 100, display: 'flex', alignItems: 'center', gap: 5,
+            position: 'absolute', top: 12, left: 12,
+            fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 100,
+            display: 'flex', alignItems: 'center', gap: 5,
             background: equipment.is_available ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)',
             border: `1px solid ${equipment.is_available ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`,
             color: equipment.is_available ? '#4ade80' : '#f87171',
@@ -49,6 +59,7 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
           </span>
         </div>
 
+        {/* Content */}
         <div style={{ padding: '20px 22px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: 11, color: '#f4a261', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, marginBottom: 8, display: 'block' }}>
             {equipment.category}
@@ -56,7 +67,11 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
           <h3 style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8, letterSpacing: '-0.01em', lineHeight: 1.3 }}>
             {equipment.name}
           </h3>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, flex: 1, marginBottom: 16, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
+          <p style={{
+            fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, flex: 1,
+            marginBottom: 16, overflow: 'hidden', display: '-webkit-box',
+            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as React.CSSProperties['WebkitBoxOrient'],
+          }}>
             {equipment.description || 'Professional-grade equipment available for rental.'}
           </p>
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

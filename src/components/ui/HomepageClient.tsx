@@ -2,15 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-
-type Equipment = {
-  id: string
-  name: string
-  category: string
-  daily_rate: number
-  image_url: string
-  is_available: boolean
-}
+import Image from 'next/image'
+import { ADMIN_EMAIL } from '@/lib/constants'
+import type { Equipment } from '@/types'
 
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null)
@@ -240,9 +234,9 @@ export default function HomepageClient({ equipment, totalEquipment, totalBooking
               <Reveal key={item.id} delay={i * 60}>
                 <Link href={`/catalog/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                   <div style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden', transition: 'all 0.3s', background: 'rgba(255,255,255,0.02)' }}>
-                    <div style={{ aspectRatio: '16/9', background: '#111', overflow: 'hidden' }}>
+                    <div style={{ position: 'relative', aspectRatio: '16/9', background: '#111', overflow: 'hidden' }}>
                       {item.image_url
-                        ? <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? <Image src={item.image_url} alt={item.name} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" style={{ objectFit: 'cover' }} loading="lazy" />
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🚧</div>
                       }
                     </div>
@@ -368,7 +362,7 @@ export default function HomepageClient({ equipment, totalEquipment, totalBooking
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '28px 24px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <span style={{ fontWeight: 800, fontSize: 15, color: '#fff', letterSpacing: '-0.02em' }}>ConstructRent</span>
-          <a href="mailto:hello@constructrent.in" style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>hello@constructrent.in</a>
+          <a href={`mailto:${ADMIN_EMAIL}`} style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>{ADMIN_EMAIL}</a>
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.18)' }}>© 2026</span>
         </div>
       </footer>

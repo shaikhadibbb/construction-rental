@@ -99,9 +99,7 @@ export default function AboutPage() {
           <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', marginBottom: 56, lineHeight: 1.1 }}>What we stand for.</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
             {VALUES.map((v, i) => (
-              <div key={v.title} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '28px', background: 'rgba(255,255,255,0.02)', transition: 'all 0.3s' }}
-                onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(244,162,97,0.2)'; e.currentTarget.style.background = 'rgba(244,162,97,0.03)' }}
-                onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}>
+              <div key={v.title} className="cr-value-card" style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '28px', background: 'rgba(255,255,255,0.02)', transition: 'all 0.3s' }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(244,162,97,0.6)', letterSpacing: '0.1em', display: 'block', marginBottom: 16 }}>0{i + 1}</span>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 10, letterSpacing: '-0.01em' }}>{v.title}</h3>
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', lineHeight: 1.75 }}>{v.desc}</p>
@@ -151,6 +149,7 @@ export default function AboutPage() {
 
       <style>{`
         @media (max-width: 768px) { .cr-story-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }
+        .cr-value-card:hover { border-color: rgba(244,162,97,0.2) !important; background: rgba(244,162,97,0.03) !important; }
       `}</style>
     </div>
   )

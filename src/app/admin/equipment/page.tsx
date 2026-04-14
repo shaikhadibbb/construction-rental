@@ -1,37 +1,66 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import Image from 'next/image'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import type { Equipment } from '@/types'
 
+/** Admin equipment list page — dark themed */
 export default function AdminEquipmentPage() {
-  const [equipment, setEquipment] = useState<any[]>([])
+  const [equipment, setEquipment] = useState<Equipment[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [toggling, setToggling] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
   const fetchEquipment = async () => {
-    const { data } = await supabase.from('equipment').select('*').order('created_at')
-    setEquipment(data || [])
-    setLoading(false)
+    try {
+      const { data, error: fetchErr } = await supabase
+        .from('equipment')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200)
+      if (fetchErr) throw fetchErr
+      setEquipment(data || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load equipment')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { fetchEquipment() }, [])
 
   const handleToggle = async (id: string, current: boolean) => {
     setToggling(id)
-    await supabase.from('equipment').update({ is_available: !current }).eq('id', id)
-    await fetchEquipment()
-    setToggling(null)
+    try {
+      const { error: updateErr } = await supabase
+        .from('equipment')
+        .update({ is_available: !current })
+        .eq('id', id)
+      if (updateErr) throw updateErr
+      setEquipment(prev => prev.map(e => e.id === id ? { ...e, is_available: !current } : e))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed')
+    } finally {
+      setToggling(null)
+    }
   }
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
     setDeleting(id)
-    await supabase.from('equipment').delete().eq('id', id)
-    await fetchEquipment()
-    setDeleting(null)
+    try {
+      const { error: deleteErr } = await supabase.from('equipment').delete().eq('id', id)
+      if (deleteErr) throw deleteErr
+      setEquipment(prev => prev.filter(e => e.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed')
+    } finally {
+      setDeleting(null)
+    }
   }
 
   const filtered = equipment.filter(item =>
@@ -41,121 +70,164 @@ export default function AdminEquipmentPage() {
 
   const available = equipment.filter(e => e.is_available).length
 
+  const cell: React.CSSProperties = { padding: '14px 20px', fontSize: 13, color: 'rgba(255,255,255,0.7)', borderBottom: '1px solid rgba(255,255,255,0.05)' }
+  const thStyle: React.CSSProperties = { padding: '12px 20px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.07)' }
+
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-gray-400 text-sm">Loading equipment...</p>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 240 }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 36, height: 36, border: '3px solid rgba(244,162,97,0.3)', borderTopColor: '#f4a261', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Loading equipment…</p>
       </div>
     </div>
   )
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <p className="text-yellow-600 text-xs font-bold tracking-widest uppercase mb-1">Fleet</p>
-          <h1 className="text-3xl font-black text-gray-900">Equipment</h1>
-          <p className="text-gray-400 text-sm mt-0.5">{available} available · {equipment.length} total</p>
+          <p style={{ fontSize: 11, color: '#f4a261', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>Fleet</p>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Equipment</h1>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>{available} available · {equipment.length} total</p>
         </div>
         <Link href="/admin/equipment/new"
-          className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-5 py-2.5 rounded-xl transition-colors text-sm">
-          + Add New
+          style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 800, padding: '10px 20px', borderRadius: 10, textDecoration: 'none', fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          + Add Equipment
         </Link>
       </div>
 
-      <div className="relative mb-6">
-        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Error */}
+      {error && (
+        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#f87171' }}>
+          {error}
+        </div>
+      )}
+
+      {/* Search */}
+      <div style={{ position: 'relative', marginBottom: 20 }}>
+        <svg style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'rgba(255,255,255,0.25)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search by name or category..."
-          className="w-full bg-white border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 shadow-sm" />
+        <input
+          type="text" value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by name or category…"
+          aria-label="Search equipment"
+          style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 36px 10px 40px', fontSize: 14, color: '#e8e8e8', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
+          onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.4)')}
+          onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
+        />
         {search && (
-          <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button
+            onClick={() => setSearch('')}
+            aria-label="Clear search"
+            style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4, display: 'flex' }}>
+            <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         )}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Equipment</th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Category</th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider hidden md:table-cell">Rate</th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="text-left px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filtered.length === 0 ? (
+      {/* Table */}
+      <div style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden', background: 'rgba(255,255,255,0.01)' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center text-gray-400">
-                  <p className="text-3xl mb-2">🔍</p>
-                  <p className="font-medium">No equipment found</p>
-                </td>
+                <th style={thStyle}>Equipment</th>
+                <th style={{ ...thStyle, display: 'none' }} className="sm-show">Category</th>
+                <th style={{ ...thStyle, display: 'none' }} className="md-show">Rate</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Actions</th>
               </tr>
-            ) : filtered.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      {item.image_url
-                        ? <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-lg">🚧</div>
-                      }
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ ...cell, textAlign: 'center', padding: '60px 24px' }}>
+                    <p style={{ fontSize: 28, marginBottom: 8 }}>🔍</p>
+                    <p style={{ color: 'rgba(255,255,255,0.4)' }}>No equipment found</p>
+                  </td>
+                </tr>
+              ) : filtered.map(item => (
+                <tr key={item.id}>
+                  <td style={cell}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden', background: '#111', flexShrink: 0, position: 'relative' }}>
+                        {item.image_url ? (
+                          <Image
+                            src={item.image_url}
+                            alt={item.name}
+                            fill
+                            sizes="44px"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚧</div>
+                        )}
+                      </div>
+                      <div>
+                        <p style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 2 }}>{item.name}</p>
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', textTransform: 'capitalize' }}>{item.category}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-900 text-sm">{item.name}</p>
-                      <p className="text-xs text-gray-400 capitalize sm:hidden">{item.category}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 hidden sm:table-cell">
-                  <span className="text-xs font-bold text-yellow-600 bg-yellow-50 border border-yellow-100 px-2.5 py-1 rounded-full capitalize">
-                    {item.category}
-                  </span>
-                </td>
-                <td className="px-6 py-4 hidden md:table-cell">
-                  <span className="text-sm font-black text-[#0a1628]">${item.daily_rate}</span>
-                  <span className="text-xs text-gray-400">/day</span>
-                </td>
-                <td className="px-6 py-4">
-                  <button onClick={() => handleToggle(item.id, item.is_available)}
-                    disabled={toggling === item.id}
-                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
-                      item.is_available
-                        ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
-                        : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
-                    } ${toggling === item.id ? 'opacity-50' : ''}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.is_available ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                    {toggling === item.id ? '...' : item.is_available ? 'Available' : 'Unavailable'}
-                  </button>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <Link href={'/admin/equipment/' + item.id}
-                      className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
-                      Edit
-                    </Link>
-                    <Link href={'/catalog/' + item.id} target="_blank"
-                      className="text-xs font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-                      View
-                    </Link>
-                    <button onClick={() => handleDelete(item.id, item.name)}
-                      disabled={deleting === item.id}
-                      className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
-                      {deleting === item.id ? '...' : 'Delete'}
+                  </td>
+                  <td style={{ ...cell, display: 'none' }} className="sm-show">
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#f4a261', background: 'rgba(244,162,97,0.1)', border: '1px solid rgba(244,162,97,0.2)', padding: '3px 8px', borderRadius: 100, textTransform: 'capitalize' }}>
+                      {item.category}
+                    </span>
+                  </td>
+                  <td style={{ ...cell, display: 'none' }} className="md-show">
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>₹{item.daily_rate.toLocaleString('en-IN')}</span>
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>/day</span>
+                  </td>
+                  <td style={cell}>
+                    <button
+                      onClick={() => handleToggle(item.id, item.is_available)}
+                      disabled={toggling === item.id}
+                      aria-label={`Toggle availability for ${item.name}`}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        fontSize: 12, fontWeight: 700, padding: '5px 10px', borderRadius: 100, border: '1px solid', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                        background: item.is_available ? 'rgba(74,222,128,0.1)' : 'rgba(239,68,68,0.1)',
+                        borderColor: item.is_available ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)',
+                        color: item.is_available ? '#4ade80' : '#f87171',
+                        opacity: toggling === item.id ? 0.5 : 1,
+                      }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: item.is_available ? '#4ade80' : '#f87171', flexShrink: 0, animation: item.is_available ? 'pulse-dot 2s infinite' : 'none' }} />
+                      {toggling === item.id ? '…' : item.is_available ? 'Available' : 'Unavailable'}
                     </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td style={cell}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Link href={`/admin/equipment/${item.id}`}
+                        style={{ fontSize: 12, fontWeight: 700, color: '#f4a261', background: 'rgba(244,162,97,0.1)', border: '1px solid rgba(244,162,97,0.2)', padding: '5px 10px', borderRadius: 7, textDecoration: 'none' }}>
+                        Edit
+                      </Link>
+                      <Link href={`/catalog/${item.id}`} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', padding: '5px 10px', borderRadius: 7, textDecoration: 'none' }}>
+                        View
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(item.id, item.name)}
+                        disabled={deleting === item.id}
+                        aria-label={`Delete ${item.name}`}
+                        style={{ fontSize: 12, fontWeight: 700, color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', padding: '5px 10px', borderRadius: 7, cursor: 'pointer', fontFamily: 'inherit', opacity: deleting === item.id ? 0.5 : 1 }}>
+                        {deleting === item.id ? '…' : 'Delete'}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <style>{`
+        @media (min-width: 640px) { .sm-show { display: table-cell !important; } }
+        @media (min-width: 768px) { .md-show { display: table-cell !important; } }
+      `}</style>
     </div>
   )
 }
