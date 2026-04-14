@@ -23,11 +23,15 @@ type Booking = {
   }
 }
 
-const STATUS_CONFIG: Record<string, { label: string, classes: string, dot: string }> = {
-  pending:   { label: 'Pending Review', classes: 'bg-yellow-50 text-yellow-700 border border-yellow-200', dot: 'bg-yellow-500 animate-pulse' },
-  confirmed: { label: 'Confirmed', classes: 'bg-green-50 text-green-700 border border-green-200', dot: 'bg-green-500' },
-  cancelled: { label: 'Cancelled', classes: 'bg-red-50 text-red-600 border border-red-200', dot: 'bg-red-500' },
-  completed: { label: 'Completed', classes: 'bg-gray-100 text-gray-600 border border-gray-200', dot: 'bg-gray-400' },
+const STATUS: Record<string, { label: string, color: string, dot: string, pulse?: boolean }> = {
+  pending:   { label: 'Pending Review', color: 'rgba(234,179,8,0.15)', dot: '#eab308', pulse: true },
+  confirmed: { label: 'Confirmed', color: 'rgba(74,222,128,0.12)', dot: '#4ade80' },
+  cancelled: { label: 'Cancelled', color: 'rgba(239,68,68,0.12)', dot: '#f87171' },
+  completed: { label: 'Completed', color: 'rgba(255,255,255,0.06)', dot: 'rgba(255,255,255,0.3)' },
+}
+
+const STATUS_TEXT: Record<string, string> = {
+  pending: '#eab308', confirmed: '#4ade80', cancelled: '#f87171', completed: 'rgba(255,255,255,0.4)',
 }
 
 export default function DashboardPage() {
@@ -58,16 +62,15 @@ export default function DashboardPage() {
     })
   }, [router, fetchBookings])
 
-  const cancelBooking = async (bookingId: string) => {
+  const cancelBooking = async (id: string) => {
     if (!confirm('Cancel this booking?')) return
-    await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId)
-    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled' } : b))
+    await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', id)
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' } : b))
   }
 
   const calcDays = (start: string, end: string) => {
     if (!start || !end) return 0
-    const diff = new Date(end).getTime() - new Date(start).getTime()
-    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1
+    return Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)) + 1
   }
 
   const filtered = filter === 'all' ? bookings : bookings.filter(b => b.status === filter)
@@ -79,79 +82,78 @@ export default function DashboardPage() {
     spent: bookings.filter(b => b.status !== 'cancelled').reduce((s, b) => s + Number(b.total_amount || 0), 0),
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">Loading your dashboard...</p>
-        </div>
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 40, height: 40, border: '3px solid rgba(244,162,97,0.3)', borderTopColor: '#f4a261', borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 16px' }} />
+        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>Loading your dashboard...</p>
       </div>
-    )
-  }
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
       {/* Header */}
-      <div className="bg-[#0a1628]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex items-center justify-between">
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 40px', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
             <div>
-              <p className="text-yellow-500 text-xs font-bold tracking-widest uppercase mb-1">My Account</p>
-              <h1 className="text-3xl font-black text-white">Dashboard</h1>
-              {user && <p className="text-gray-400 text-sm mt-1">{user.email}</p>}
+              <p style={{ fontSize: 12, color: '#f4a261', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 600 }}>My Account</p>
+              <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', marginBottom: 6, lineHeight: 1.05 }}>Dashboard</h1>
+              {user && <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)' }}>{user.email}</p>}
             </div>
-            <Link href="/catalog"
-              className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-5 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2">
+            <Link href="/catalog" style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '12px 22px', borderRadius: 10, textDecoration: 'none', fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               + Rent Equipment
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
             {[
-              { label: 'Total Bookings', value: stats.total, icon: '📋' },
-              { label: 'Active Rentals', value: stats.active, icon: '✅' },
-              { label: 'Pending Review', value: stats.pending, icon: '⏳' },
-              { label: 'Total Spent', value: '$' + stats.spent.toLocaleString(), icon: '💰' },
+              { label: 'Total Bookings', value: stats.total },
+              { label: 'Active Rentals', value: stats.active },
+              { label: 'Pending Review', value: stats.pending },
+              { label: 'Total Spent', value: stats.spent > 0 ? `₹${stats.spent.toLocaleString('en-IN')}` : '—' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p className="text-lg mb-1">{stat.icon}</p>
-                <p className="text-2xl font-black text-white">{stat.value}</p>
-                <p className="text-gray-400 text-xs mt-0.5">{stat.label}</p>
+              <div key={stat.label} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
+                <p style={{ fontSize: 28, fontWeight: 800, color: '#fff', marginBottom: 4, letterSpacing: '-0.02em' }}>{stat.value}</p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.02em' }}>{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px 80px', position: 'relative', zIndex: 1 }}>
 
         {/* Success banner */}
         {justBooked && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4 mb-6 flex items-center gap-4">
-            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+          <div style={{ border: '1px solid rgba(74,222,128,0.25)', borderRadius: 14, padding: '16px 20px', marginBottom: 24, background: 'rgba(74,222,128,0.06)', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 36, height: 36, background: '#4ade80', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="16" height="16" fill="none" stroke="#080808" strokeWidth="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
             </div>
             <div>
-              <p className="font-bold text-green-800">Quote request submitted!</p>
-              <p className="text-green-600 text-sm">We'll get back to you within 2 hours with pricing details.</p>
+              <p style={{ fontWeight: 700, color: '#4ade80', fontSize: 14 }}>Quote request submitted!</p>
+              <p style={{ color: 'rgba(74,222,128,0.6)', fontSize: 13 }}>We'll get back to you within 2 hours with pricing details.</p>
             </div>
           </div>
         )}
 
         {/* Filter tabs */}
         {bookings.length > 0 && (
-          <div className="flex gap-2 mb-6 flex-wrap">
+          <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
             {(['all', 'pending', 'confirmed', 'completed', 'cancelled'] as const).map(tab => (
-              <button key={tab} onClick={() => setFilter(tab)}
-                className={'px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ' +
-                  (filter === tab ? 'bg-[#0a1628] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300')}>
+              <button key={tab} onClick={() => setFilter(tab)} style={{
+                padding: '7px 16px', borderRadius: 100, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', border: 'none', fontFamily: 'inherit', transition: 'all 0.2s',
+                background: filter === tab ? '#f4a261' : 'rgba(255,255,255,0.06)',
+                color: filter === tab ? '#0a0a0a' : 'rgba(255,255,255,0.45)',
+              }}>
                 {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                <span className="ml-1.5 text-xs opacity-60">
+                <span style={{ marginLeft: 6, opacity: 0.6, fontSize: 12 }}>
                   ({tab === 'all' ? bookings.length : bookings.filter(b => b.status === tab).length})
                 </span>
               </button>
@@ -159,79 +161,76 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Bookings list */}
+        {/* Bookings */}
         {filtered.length === 0 && bookings.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-            <div className="text-5xl mb-4">📋</div>
-            <h2 className="text-xl font-black text-gray-800 mb-2">No bookings yet</h2>
-            <p className="text-gray-400 mb-6">Browse our catalog and request a quote for your first rental</p>
-            <Link href="/catalog" className="bg-yellow-500 hover:bg-yellow-600 text-[#0a1628] font-black px-6 py-3 rounded-xl transition-colors">
+          <div style={{ textAlign: 'center', padding: '80px 24px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 20, background: 'rgba(255,255,255,0.01)' }}>
+            <p style={{ fontSize: 40, marginBottom: 16 }}>📋</p>
+            <p style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 8 }}>No bookings yet</p>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', marginBottom: 28 }}>Browse our catalog and request a quote for your first rental</p>
+            <Link href="/catalog" style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '13px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 14 }}>
               Browse Equipment →
             </Link>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-gray-200">
-            <p className="text-gray-400">No {filter} bookings found</p>
+          <div style={{ textAlign: 'center', padding: '48px', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, background: 'rgba(255,255,255,0.02)' }}>
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>No {filter} bookings found</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filtered.map((booking) => {
-              const status = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filtered.map(booking => {
+              const status = STATUS[booking.status] || STATUS.pending
               const equipName = booking.equipment_name || booking.equipment?.name || 'Equipment'
               const equipImg = booking.equipment?.image_url
               const days = booking.start_date && booking.end_date ? calcDays(booking.start_date, booking.end_date) : null
+              const date = new Date(booking.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
               return (
-                <div key={booking.id} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
-                  <div className="flex gap-4 items-start">
+                <div key={booking.id} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '20px', background: 'rgba(255,255,255,0.02)', transition: 'all 0.2s' }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+
                     {/* Image */}
-                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      {equipImg ? (
-                        <img src={equipImg} alt={equipName} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl">🚧</div>
-                      )}
+                    <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', background: '#111', flexShrink: 0 }}>
+                      {equipImg
+                        ? <img src={equipImg} alt={equipName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🚧</div>
+                      }
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3 mb-2">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
                         <div>
-                          <h3 className="font-black text-[#0a1628] text-base leading-tight">{equipName}</h3>
+                          <p style={{ fontWeight: 700, color: '#fff', fontSize: 16, marginBottom: 3, letterSpacing: '-0.01em' }}>{equipName}</p>
                           {booking.equipment?.category && (
-                            <p className="text-xs text-gray-400 capitalize mt-0.5">{booking.equipment.category}</p>
+                            <p style={{ fontSize: 12, color: '#f4a261', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{booking.equipment.category}</p>
                           )}
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 flex-shrink-0 ${status.classes}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 100, background: status.color, color: STATUS_TEXT[booking.status], flexShrink: 0 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: status.dot, display: 'inline-block', animation: status.pulse ? 'pulse 2s infinite' : 'none' }} />
                           {status.label}
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+                      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
                         {booking.start_date && booking.end_date && (
-                          <span className="flex items-center gap-1">
-                            📅 {booking.start_date} → {booking.end_date}
-                            {days && <span className="text-xs text-gray-400">({days} days)</span>}
-                          </span>
+                          <span>📅 {booking.start_date} → {booking.end_date}{days ? ` · ${days} days` : ''}</span>
                         )}
                         {booking.total_amount > 0 && (
-                          <span className="font-bold text-[#0a1628]">💰 ${booking.total_amount}</span>
+                          <span style={{ color: '#fff', fontWeight: 600 }}>₹{Number(booking.total_amount).toLocaleString('en-IN')}</span>
                         )}
-                        <span className="text-xs text-gray-400">
-                          Submitted {new Date(booking.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </span>
+                        <span>Submitted {date}</span>
                       </div>
 
                       {booking.notes && (
-                        <p className="text-xs text-gray-400 mt-2 bg-gray-50 rounded-lg px-3 py-2 italic">"{booking.notes}"</p>
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', marginTop: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px', fontStyle: 'italic' }}>"{booking.notes}"</p>
                       )}
                     </div>
 
-                    {/* Cancel button */}
+                    {/* Cancel */}
                     {booking.status === 'pending' && (
-                      <button onClick={() => cancelBooking(booking.id)}
-                        className="text-xs text-red-400 hover:text-red-600 font-semibold flex-shrink-0 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                      <button onClick={() => cancelBooking(booking.id)} style={{ fontSize: 12, color: '#f87171', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, flexShrink: 0, transition: 'all 0.2s' }}>
                         Cancel
                       </button>
                     )}
@@ -243,17 +242,21 @@ export default function DashboardPage() {
         )}
 
         {/* Bottom CTA */}
-        <div className="mt-8 bg-[#0a1628] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div style={{ marginTop: 32, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px 28px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <p className="font-black text-white">Need more equipment?</p>
-            <p className="text-gray-400 text-sm mt-0.5">Browse our full catalog of 50+ machines</p>
+            <p style={{ fontWeight: 700, color: '#fff', fontSize: 15, marginBottom: 4 }}>Need more equipment?</p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Browse our full catalog of 50+ machines</p>
           </div>
-          <Link href="/catalog"
-            className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap">
+          <Link href="/catalog" style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '11px 22px', borderRadius: 10, textDecoration: 'none', fontSize: 14 }}>
             Browse Catalog →
           </Link>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+      `}</style>
     </div>
   )
 }
