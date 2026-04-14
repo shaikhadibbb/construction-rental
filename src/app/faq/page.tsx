@@ -6,7 +6,6 @@ import Link from 'next/link'
 const FAQS = [
   {
     category: 'Booking',
-    icon: '📅',
     questions: [
       { q: 'How do I rent equipment?', a: 'Browse our catalog, select the equipment you need, fill in your project details and rental dates, and submit a quote request. Our team responds within 2 hours with pricing and availability.' },
       { q: 'Can I cancel or modify my booking?', a: 'Yes, you can cancel from your dashboard. Cancellations made 48 hours before the start date are fully refunded. To modify dates, contact us directly.' },
@@ -15,32 +14,29 @@ const FAQS = [
     ]
   },
   {
-    category: 'Pricing & Payment',
-    icon: '💰',
+    category: 'Pricing',
     questions: [
       { q: 'How is pricing calculated?', a: 'All equipment is priced per day. The total is calculated based on your rental period. There are no hidden fees — the price you see is the price you pay.' },
       { q: 'What payment methods are accepted?', a: 'We accept all major credit/debit cards, UPI, and net banking through our secure payment gateway.' },
       { q: 'Is there a security deposit?', a: 'A refundable security deposit may be required for heavy equipment. This will be shown clearly before you confirm your booking.' },
-      { q: 'Do you offer discounts for long-term rentals?', a: 'Yes! Rentals of 7 days or more receive a 10% discount, and rentals of 30 days or more receive a 20% discount. Contact us for custom quotes on large projects.' },
+      { q: 'Do you offer discounts for long-term rentals?', a: 'Yes. Rentals of 7+ days receive a 10% discount, and 30+ days receive a 20% discount. Contact us for custom quotes on large projects.' },
     ]
   },
   {
     category: 'Equipment',
-    icon: '🚧',
     questions: [
-      { q: 'Is all equipment insured?', a: 'Yes, all equipment on ConstructRent is fully insured. However, renters are responsible for damages caused by misuse or negligence during the rental period.' },
-      { q: 'Do you provide an operator with the equipment?', a: 'Equipment is rented without an operator by default. If you need a certified operator, contact us and we will arrange one at an additional cost.' },
+      { q: 'Is all equipment insured?', a: 'Yes, all equipment on ConstructRent is fully insured. Renters are responsible for damages caused by misuse or negligence during the rental period.' },
+      { q: 'Do you provide an operator?', a: 'Equipment is rented without an operator by default. If you need a certified operator, contact us and we will arrange one at an additional cost.' },
       { q: 'What happens if the equipment breaks down?', a: 'Call us immediately. We will arrange a replacement or repair as quickly as possible. You will not be charged for downtime caused by equipment failure on our end.' },
       { q: 'How is equipment delivered?', a: 'We deliver directly to your construction site across Mumbai and surrounding areas. Delivery costs depend on distance and are confirmed in your quote.' },
     ]
   },
   {
     category: 'Account',
-    icon: '👤',
     questions: [
       { q: 'Do I need an account to rent?', a: 'You can submit a quote request without an account. However, creating a free account lets you track your bookings, view history, and manage rentals from your dashboard.' },
       { q: 'How do I view my booking history?', a: 'Log in and go to your Dashboard. All your past and current bookings are listed there with their status and details.' },
-      { q: 'I forgot my password. What should I do?', a: 'Click "Login" and then "Forgot Password". Enter your email and we will send you a reset link within a few minutes.' },
+      { q: 'I forgot my password. What do I do?', a: 'Click "Login" then "Forgot Password". Enter your email and we will send you a reset link within a few minutes.' },
     ]
   },
 ]
@@ -48,20 +44,26 @@ const FAQS = [
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border-b border-gray-100 last:border-0">
-      <button onClick={() => setOpen(!open)}
-        className="w-full flex justify-between items-center py-4 text-left gap-4 group">
-        <span className={`font-semibold text-sm sm:text-base transition-colors ${open ? 'text-yellow-600' : 'text-gray-900 group-hover:text-yellow-600'}`}>
+    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }} className="cr-faq-last">
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '20px 0', textAlign: 'left', gap: 16, background: 'none', border: 'none', cursor: 'pointer',
+      }}>
+        <span style={{ fontSize: 15, fontWeight: 500, color: open ? '#f4a261' : 'rgba(255,255,255,0.8)', transition: 'color 0.2s', lineHeight: 1.5, fontFamily: 'inherit' }}>
           {q}
         </span>
-        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${open ? 'bg-yellow-500 rotate-45' : 'bg-gray-100 group-hover:bg-yellow-50'}`}>
-          <svg className={`w-3 h-3 ${open ? 'text-[#0a1628]' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+        <div style={{
+          width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          background: open ? '#f4a261' : 'rgba(255,255,255,0.07)', transition: 'all 0.2s',
+          transform: open ? 'rotate(45deg)' : 'none',
+        }}>
+          <svg width="10" height="10" fill="none" stroke={open ? '#0a0a0a' : 'rgba(255,255,255,0.5)'} strokeWidth="2.5" viewBox="0 0 24 24">
+            <path d="M12 4v16m8-8H4" />
           </svg>
         </div>
       </button>
       {open && (
-        <p className="text-gray-500 text-sm leading-relaxed pb-4 pr-10">{a}</p>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.42)', lineHeight: 1.8, paddingBottom: 20, paddingRight: 40 }}>{a}</p>
       )}
     </div>
   )
@@ -74,111 +76,104 @@ export default function FAQPage() {
   const filtered = FAQS.map(cat => ({
     ...cat,
     questions: cat.questions.filter(
-      q => q.q.toLowerCase().includes(search.toLowerCase()) ||
-           q.a.toLowerCase().includes(search.toLowerCase())
+      q => q.q.toLowerCase().includes(search.toLowerCase()) || q.a.toLowerCase().includes(search.toLowerCase())
     )
-  })).filter(cat =>
-    cat.questions.length > 0 &&
-    (activeCategory === 'All' || cat.category === activeCategory)
-  )
+  })).filter(cat => cat.questions.length > 0 && (activeCategory === 'All' || cat.category === activeCategory))
 
   const totalQuestions = FAQS.reduce((s, c) => s + c.questions.length, 0)
 
   return (
-    <div className="bg-white min-h-screen">
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
       {/* Header */}
-      <div className="bg-[#0a1628] relative overflow-hidden py-20 px-4">
-        <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,.5) 40px, rgba(255,255,255,.5) 41px)'}} />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-yellow-500/5 rounded-full blur-3xl" />
-        <div className="relative max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full px-4 py-2 mb-6">
-            <span className="w-2 h-2 bg-yellow-500 rounded-full" />
-            <span className="text-yellow-400 text-sm font-semibold tracking-wide">{totalQuestions} QUESTIONS ANSWERED</span>
-          </div>
-          <h1 className="text-5xl font-black text-white mb-4">
-            Frequently Asked <span className="text-yellow-500">Questions</span>
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '72px 24px 48px', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <p style={{ fontSize: 12, color: '#f4a261', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>{totalQuestions} questions answered</p>
+          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', marginBottom: 12, lineHeight: 1.05 }}>
+            Frequently asked questions.
           </h1>
-          <p className="text-gray-400 text-lg">Everything you need to know about renting with ConstructRent</p>
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>Everything you need to know about renting with ConstructRent.</p>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px 80px', position: 'relative', zIndex: 1 }}>
 
         {/* Search */}
-        <div className="relative mb-6">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style={{ position: 'relative', marginBottom: 28 }}>
+          <svg style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'rgba(255,255,255,0.25)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search questions..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-colors" />
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search questions..."
+            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '13px 16px 13px 44px', fontSize: 15, color: '#e8e8e8', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
+            onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.4)')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')} />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', padding: 4 }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           )}
         </div>
 
-        {/* Category filter */}
+        {/* Category tabs */}
         {!search && (
-          <div className="flex gap-2 flex-wrap mb-8">
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 36 }}>
             {['All', ...FAQS.map(c => c.category)].map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                  activeCategory === cat ? 'bg-[#0a1628] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}>
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{
+                padding: '7px 16px', borderRadius: 100, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', border: 'none', fontFamily: 'inherit', transition: 'all 0.2s',
+                background: activeCategory === cat ? '#f4a261' : 'rgba(255,255,255,0.06)',
+                color: activeCategory === cat ? '#0a0a0a' : 'rgba(255,255,255,0.45)',
+              }}>
                 {cat}
               </button>
             ))}
           </div>
         )}
 
-        {/* FAQ sections */}
+        {/* FAQs */}
         {filtered.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 rounded-2xl">
-            <p className="text-4xl mb-3">🤔</p>
-            <p className="font-bold text-gray-700">No questions found</p>
-            <p className="text-sm text-gray-400 mt-1">Try a different search term</p>
+          <div style={{ textAlign: 'center', padding: '64px 24px', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, background: 'rgba(255,255,255,0.02)' }}>
+            <p style={{ fontSize: 32, marginBottom: 12 }}>🤔</p>
+            <p style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 6 }}>No questions found</p>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>Try a different search term</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {filtered.map(cat => (
-              <div key={cat.category} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50">
-                  <span className="text-xl">{cat.icon}</span>
-                  <h2 className="font-black text-[#0a1628] text-sm uppercase tracking-wider">{cat.category}</h2>
-                  <span className="ml-auto text-xs text-gray-400 font-medium">{cat.questions.length} questions</span>
+              <div key={cat.category} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: '#f4a261', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{cat.category}</p>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>{cat.questions.length} questions</span>
                 </div>
-                <div className="px-6">
-                  {cat.questions.map(item => (
-                    <FAQItem key={item.q} q={item.q} a={item.a} />
-                  ))}
+                <div style={{ padding: '0 24px' }}>
+                  {cat.questions.map(item => <FAQItem key={item.q} q={item.q} a={item.a} />)}
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* CTA */}
-        <div className="mt-10 bg-[#0a1628] rounded-2xl p-8 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-yellow-500/5 rounded-full blur-3xl" />
-          <div className="relative">
-            <p className="text-2xl font-black text-white mb-2">Still have questions?</p>
-            <p className="text-gray-400 mb-6 text-sm">Our team is happy to help you find the right equipment for your project</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/contact"
-                className="bg-yellow-500 hover:bg-yellow-400 text-[#0a1628] font-black px-8 py-3 rounded-xl transition-colors inline-block text-sm">
-                Contact Us →
-              </Link>
-              <a href="tel:+919876543210"
-                className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-3 rounded-xl transition-colors inline-block text-sm">
-                📞 Call Us
-              </a>
-            </div>
+        {/* Bottom CTA */}
+        <div style={{ marginTop: 48, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '48px 32px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 400, height: 200, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(244,162,97,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <p style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8, letterSpacing: '-0.02em', position: 'relative' }}>Still have questions?</p>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.38)', marginBottom: 28, position: 'relative', lineHeight: 1.7 }}>Our team is happy to help you find the right equipment for your project.</p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
+            <Link href="/contact" style={{ background: '#f4a261', color: '#0a0a0a', fontWeight: 700, padding: '12px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 14 }}>
+              Contact Us →
+            </Link>
+            <a href="tel:+919876543210" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', fontWeight: 600, padding: '12px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 14, border: '1px solid rgba(255,255,255,0.1)' }}>
+              Call Us
+            </a>
           </div>
         </div>
       </div>
+
+      <style>{`
+        input::placeholder { color: rgba(255,255,255,0.18); }
+        .cr-faq-last:last-child { border-bottom: none !important; }
+      `}</style>
     </div>
   )
 }
