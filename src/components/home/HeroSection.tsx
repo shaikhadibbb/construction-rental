@@ -60,6 +60,7 @@ export function HeroSection() {
             </div>
           </MotionReveal>
 
+          <div className="mt-8 grid gap-3 text-sm text-white md:grid-cols-2">
             {[
               { label: 'OSHA & DOT Certified Fleet', Icon: BadgeCheck },
               { label: 'Fully Licensed & Insured ($5M)', Icon: ShieldCheck },
