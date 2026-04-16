@@ -10,12 +10,12 @@ export function PremiumFooter() {
   const [focus, setFocus] = useState(false)
 
   return (
-    <footer className="relative z-10 bg-slate-900 px-6 pb-12 pt-20 text-white">
+    <footer className="relative z-10 px-6 pb-12 pt-20 text-white" style={{ background: '#050505', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
       <MotionReveal>
         <div className="mx-auto grid w-full max-w-7xl gap-10 md:grid-cols-4">
           <div>
             <p className="font-space-grotesk text-2xl tracking-[-0.02em] text-white">ConstructRent</p>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
+            <p className="mt-3 text-sm leading-7" style={{ color: 'rgba(255,255,255,0.45)' }}>
               Industrial-grade rental operations for teams that need uptime, transparency, and speed.
             </p>
           </div>
@@ -54,7 +54,7 @@ export function PremiumFooter() {
           </div>
         </div>
       </MotionReveal>
-      <div className="mx-auto mt-10 grid max-w-7xl gap-2 text-xs text-slate-300 md:grid-cols-2">
+      <div className="mx-auto mt-10 grid max-w-7xl gap-2 md:grid-cols-2" style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
         <p>Mumbai HQ: Andheri East | Delhi Office: Okhla Industrial Area | Bangalore Office: Whitefield</p>
         <p>CIN: U00000MH2024PTC000000 · GST Registered</p>
         <p>
@@ -62,7 +62,7 @@ export function PremiumFooter() {
         </p>
         <p>Partners: JCB · Tata Hitachi · L&T</p>
       </div>
-      <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-4 text-xs text-slate-400">
+      <div className="mx-auto mt-10 max-w-7xl pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
         © {new Date().getFullYear()} Construct Rent. All rights reserved.
       </div>
     </footer>
