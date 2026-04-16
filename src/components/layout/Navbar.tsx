@@ -40,7 +40,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav aria-label="Main navigation" style={{ position: 'sticky', top: 0, zIndex: 100, background: scrolled ? 'rgba(7,9,13,0.82)' : 'transparent', backdropFilter: scrolled ? 'blur(24px)' : 'none', borderBottom: scrolled ? '1px solid var(--border-subtle)' : '1px solid transparent', transition: 'all 220ms var(--ease-standard)' }}>
+      <nav aria-label="Main navigation" style={{ position: 'sticky', top: 0, zIndex: 100, background: scrolled ? 'rgba(5,5,5,0.82)' : 'transparent', backdropFilter: scrolled ? 'blur(24px)' : 'none', borderBottom: scrolled ? '1px solid var(--border-subtle)' : '1px solid transparent', transition: 'all 220ms var(--ease-standard)' }}>
         <div className="ui-container" style={{ height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
           <Link href="/" className="brand-logo" style={{ fontSize: 17 }}>
@@ -102,7 +102,7 @@ export default function Navbar() {
         </div>
 
         {menuOpen && (
-          <div id="mobile-menu" style={{ background: 'rgba(7,9,13,0.98)', backdropFilter: 'blur(24px)', borderTop: '1px solid var(--border-subtle)', padding: '14px 24px 24px' }}>
+          <div id="mobile-menu" style={{ background: 'rgba(5,5,5,0.98)', backdropFilter: 'blur(24px)', borderTop: '1px solid var(--border-subtle)', padding: '14px 24px 24px' }}>
             {navLinks.map(link => (
               <Link key={link.href} href={link.href}
                 onClick={() => setMenuOpen(false)}

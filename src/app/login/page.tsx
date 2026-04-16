@@ -44,7 +44,7 @@ function LoginPageContent() {
     <div className="ui-page-shell" style={{ display: 'flex', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
 
       {/* Grid texture */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+
 
       {/* Left panel */}
       <div style={{ display: 'none', width: '50%', flexDirection: 'column', justifyContent: 'space-between', padding: '48px', borderRight: '1px solid rgba(255,255,255,0.06)', position: 'relative', zIndex: 1 }} className="cr-left-panel">

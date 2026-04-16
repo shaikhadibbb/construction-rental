@@ -29,7 +29,7 @@ const TIMELINE = [
 export default function AboutPage() {
   return (
     <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+
 
       {/* Hero */}
       <section style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '100px 24px 72px', position: 'relative', zIndex: 1 }}>

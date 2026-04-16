@@ -2,12 +2,12 @@
 
 /* ── Design Tokens: 2026 Neo-Industrial SaaS ───── */
 :root {
-  --background: #0f172a;
-  --background-elevated: #1c2538;
-  --background-strong: #2c374c;
-  --foreground: #f5f8ff;
-  --text-muted: #a7b3cc;
-  --text-subtle: #73809c;
+  --background: #050505;
+  --background-elevated: #0a0a0a;
+  --background-strong: #111111;
+  --foreground: #fcfcfc;
+  --text-muted: #888888;
+  --text-subtle: #555555;
   --accent: #ff6b2c;
   --accent-hover: #ff8a6c;
   --accent-soft: #ffb089;
@@ -63,9 +63,11 @@ body {
 /* ── Shared SaaS primitives ─────────────────────── */
 .ui-page-shell {
   min-height: 100vh;
+  position: relative;
   background:
-    radial-gradient(1000px 520px at 12% -16%, rgba(255, 107, 74, 0.22), transparent 56%),
-    radial-gradient(900px 480px at 90% -10%, rgba(255, 215, 0, 0.18), transparent 56%),
+    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzIwMCcgaGVpZ2h0PScyMDAnIGZpbHRlcj0ndXJsKCNuKScgb3BhY2l0eT0nMC4wNicvPjwvc3ZnPg=="),
+    radial-gradient(1000px 520px at 12% -16%, rgba(255, 107, 74, 0.15), transparent 56%),
+    radial-gradient(900px 480px at 90% -10%, rgba(255, 215, 0, 0.1), transparent 56%),
     var(--background);
   color: var(--foreground);
 }
@@ -179,8 +181,8 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 80px 80px;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100px 100px;
 }
 
 .brand-logo {

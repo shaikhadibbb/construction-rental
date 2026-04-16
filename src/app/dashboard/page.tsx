@@ -80,8 +80,6 @@ export default function DashboardPage() {
 
   return (
     <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
-
       {/* Header */}
       <div style={{ borderBottom: '1px solid var(--border-subtle)', padding: '56px 24px 40px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
