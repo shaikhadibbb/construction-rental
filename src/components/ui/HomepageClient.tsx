@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { PremiumNav } from '@/components/home/PremiumNav'
+
 import { HeroSection } from '@/components/home/HeroSection'
 import { EquipmentShowcase } from '@/components/home/EquipmentShowcase'
 import { FeaturesBento } from '@/components/home/FeaturesBento'
@@ -68,9 +68,7 @@ export default function HomepageClient() {
       <AnimatePresence mode="wait">
         {contentReady && (
           <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <motion.div initial={reduceMotion ? false : { y: '-100%' }} animate={{ y: 0 }} transition={{ type: 'spring', stiffness: 100, damping: 12 }}>
-              <PremiumNav />
-            </motion.div>
+
             <motion.div initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ type: 'spring', stiffness: 100, damping: 12, delay: 0.3 }}>
               <HeroSection />
             </motion.div>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
-import Navbar from '@/components/layout/Navbar'
+import { UnifiedHeader } from '@/components/layout/UnifiedHeader'
 import Footer from '@/components/layout/Footer'
 import CTABar from '@/components/ui/CTABar'
 import ToastViewport from '@/components/ui/ToastViewport'
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${inter.className}`} style={{ background: 'var(--background)', margin: 0, padding: 0 }}>
-        <Navbar />
+        <UnifiedHeader />
         <main>
           {children}
         </main>

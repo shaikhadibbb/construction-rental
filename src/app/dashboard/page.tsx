@@ -94,19 +94,36 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
-            {[
-              { label: 'Total Bookings', value: stats.total },
-              { label: 'Active Rentals', value: stats.active },
-              { label: 'Pending Review', value: stats.pending },
-              { label: 'Total Spent', value: stats.spent > 0 ? `₹${stats.spent.toLocaleString('en-IN')}` : '—' },
-            ].map(stat => (
-              <div key={stat.label} style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '20px', background: 'rgba(255,255,255,0.02)' }}>
-                <p style={{ fontSize: 28, fontWeight: 800, color: '#fff', marginBottom: 4, letterSpacing: '-0.02em' }}>{stat.value}</p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.02em' }}>{stat.label}</p>
+          {/* Bento Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+            {/* Main Spend Block */}
+            <div className="ui-card" style={{ gridColumn: 'span 12', padding: '32px', '@media (min-width: 768px)': { gridColumn: 'span 6' } as any, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700, marginBottom: 8 }}>Total Fleet Spend</p>
+              <p style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                {stats.spent > 0 ? `₹${stats.spent.toLocaleString('en-IN')}` : '—'}
+              </p>
+            </div>
+
+            {/* Quick Metrics */}
+            <div style={{ gridColumn: 'span 12', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <div className="ui-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', background: 'var(--surface-1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <span style={{ fontSize: 24 }}>🏗️</span>
+                  <span style={{ fontSize: 11, background: 'rgba(255,107,44,0.1)', color: 'var(--accent)', padding: '4px 8px', borderRadius: 100, fontWeight: 700 }}>{stats.active} Active</span>
+                </div>
+                <p style={{ fontSize: 32, fontWeight: 800, color: '#fff', marginBottom: 4, letterSpacing: '-0.02em', lineHeight: 1 }}>{stats.total}</p>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Total Bookings</p>
               </div>
-            ))}
+
+              <div className="ui-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', background: 'var(--surface-1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <span style={{ fontSize: 24 }}>⏳</span>
+                  {stats.pending > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#eab308', animation: 'pulse 2s infinite' }} />}
+                </div>
+                <p style={{ fontSize: 32, fontWeight: 800, color: '#fff', marginBottom: 4, letterSpacing: '-0.02em', lineHeight: 1 }}>{stats.pending}</p>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Pending Review</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

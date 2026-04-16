@@ -8,15 +8,14 @@ import { Menu, X } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { supabase } from '@/lib/supabase'
 
-const links = [
+const baseLinks = [
   { href: '/catalog', label: 'Equipment' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#how-it-works', label: 'How it Works' },
-  { href: '#cities', label: 'Cities' },
-  { href: '#for-contractors', label: 'For Contractors' },
+  { href: '/faq', label: 'Pricing & FAQ' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ]
 
-export function PremiumNav() {
+export function UnifiedHeader() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const reduceMotion = useReducedMotion()
@@ -53,8 +52,8 @@ export function PremiumNav() {
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
-            {links.map(link => {
-              const active = pathname === link.href
+            {baseLinks.map(link => {
+              const active = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
               return (
                 <Link key={link.href} href={link.href} className="group relative text-sm tracking-tight text-white/70 hover:text-white transition-colors">
                   <span className="font-space-grotesk">{link.label}</span>
@@ -64,29 +63,23 @@ export function PremiumNav() {
             })}
           </div>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="hidden items-center gap-3 md:flex">
             <span className="mr-2 text-xs font-medium text-white/70">Call: +91-99999-99999</span>
-            <select className="rounded-full border border-white/10 bg-transparent px-3 py-1.5 text-xs text-white/70 outline-none focus:border-white/20" aria-label="Language selector">
-              <option className="bg-slate-900 text-white">EN</option>
-              <option className="bg-slate-900 text-white">HI</option>
-              <option className="bg-slate-900 text-white">GU</option>
-              <option className="bg-slate-900 text-white">MR</option>
-            </select>
             {user ? (
               <>
-                <Link href="/dashboard" className="rounded-full border border-white/20 px-4 py-1.5 text-xs text-white hover:bg-white/5 transition-colors">Dashboard</Link>
-                <button onClick={() => supabase.auth.signOut()} className="rounded-full bg-coral hover:bg-[#ff8a6c] transition-colors px-4 py-1.5 text-xs font-semibold text-white">Logout</button>
+                <Link href="/dashboard" className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-medium text-white hover:bg-white/5 transition-colors">Dashboard</Link>
+                <button onClick={() => supabase.auth.signOut()} className="rounded-full bg-coral hover:bg-[#ff8a6c] transition-colors px-4 py-1.5 text-xs font-semibold text-[#0a0a0a] shadow-[0_0_20px_rgba(255,107,44,0.25)]">Logout</button>
               </>
             ) : (
               <>
-                <Link href="/login" className="rounded-full border border-white/20 px-4 py-1.5 text-xs text-white hover:bg-white/5 transition-colors">Login</Link>
-                <Link href="/contact" className="rounded-full bg-coral hover:bg-[#ff8a6c] transition-colors px-4 py-1.5 text-xs font-semibold text-white">Get Quote</Link>
+                <Link href="/login" className="rounded-full border border-white/20 px-4 py-1.5 text-xs font-medium text-white hover:bg-white/5 transition-colors">Login</Link>
+                <Link href="/contact" className="rounded-full bg-coral hover:bg-[#ff8a6c] transition-colors px-4 py-1.5 text-xs font-semibold text-[#0a0a0a] shadow-[0_0_20px_rgba(255,107,44,0.25)]">Get Quote</Link>
               </>
             )}
           </div>
 
           <button className="text-white md:hidden" onClick={() => setOpen(true)} aria-label="Open mobile menu">
-            <Menu size={18} />
+            <Menu size={20} />
           </button>
         </nav>
       </header>
@@ -94,20 +87,30 @@ export function PremiumNav() {
       <AnimatePresence>
         {open && (
           <motion.div className="fixed inset-0 z-50 bg-[#050505]/60 backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="ml-auto flex h-full w-[82%] max-w-sm flex-col gap-5 bg-[#0a0a0a] border-l border-white/10 p-6" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}>
+            <motion.div className="ml-auto flex h-full w-[82%] max-w-sm flex-col gap-5 bg-[#0a0a0a] border-l border-white/10 p-6 shadow-2xl" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}>
               <button className="self-end text-white/50 hover:text-white transition-colors" onClick={() => setOpen(false)} aria-label="Close mobile menu">
-                <X size={18} />
+                <X size={20} />
               </button>
-              {links.map((link, index) => (
+              {baseLinks.map((link, index) => (
                 <motion.div key={link.href} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: reduceMotion ? 0 : index * 0.1 }}>
                   <Link href={link.href} className="font-space-grotesk text-lg font-medium text-white/80 hover:text-white transition-colors border-b border-white/5 pb-2 block w-full" onClick={() => setOpen(false)}>
                     {link.label}
                   </Link>
                 </motion.div>
               ))}
-              <a href="tel:+919999999999" className="mt-4 rounded-xl bg-coral px-4 py-3 text-center font-semibold text-white">
-                Call us: +91-99999-99999
-              </a>
+              <div className="mt-4 flex flex-col gap-3">
+                {user ? (
+                  <>
+                    <Link href="/dashboard" onClick={() => setOpen(false)} className="rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold text-white">Dashboard</Link>
+                    <button onClick={() => { supabase.auth.signOut(); setOpen(false) }} className="rounded-xl bg-coral px-4 py-3 text-center text-sm font-semibold text-[#0a0a0a]">Logout</button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setOpen(false)} className="rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold text-white">Login</Link>
+                    <Link href="/contact" onClick={() => setOpen(false)} className="rounded-xl bg-coral px-4 py-3 text-center text-sm font-semibold text-[#0a0a0a]">Get Quote</Link>
+                  </>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         )}

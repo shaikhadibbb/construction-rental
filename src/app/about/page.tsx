@@ -28,7 +28,8 @@ const TIMELINE = [
 
 export default function AboutPage() {
   return (
-    <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)' }}>
+    <div className="ui-page-shell" style={{ color: '#e8e8e8', fontFamily: 'var(--font-geist-sans, -apple-system, Inter, sans-serif)', position: 'relative' }}>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.05, backgroundImage: 'url("https://images.unsplash.com/photo-1541888081604-edcf0debb1d6?q=80&w=2600&auto=format&fit=crop")', backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center', mixBlendMode: 'luminosity', pointerEvents: 'none', zIndex: 0 }} />
 
 
       {/* Hero */}
