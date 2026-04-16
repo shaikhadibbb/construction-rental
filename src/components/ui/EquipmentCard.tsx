@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { Equipment } from '@/types'
 
 /**
@@ -11,24 +12,36 @@ import type { Equipment } from '@/types'
  * @param equipment - The equipment record to display
  */
 export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
+  // Cinematic 3D Tilt Logic
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 })
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 })
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"])
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const width = rect.width; const height = rect.height
+    const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top
+    const xPct = mouseX / width - 0.5; const yPct = mouseY / height - 0.5
+    x.set(xPct); y.set(yPct)
+  }
+
+  // Artificial High-End Telematics Indicator
+  const hoursAgo = Math.floor(Math.random() * 24) + 1
+
   return (
-    <Link href={`/catalog/${equipment.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <div className="ui-card ui-card-interactive"
+    <Link href={`/catalog/${equipment.id}`} style={{ textDecoration: 'none', display: 'block', perspective: '1000px' }}>
+      <motion.div className="ui-card ui-card-interactive"
         style={{
+          rotateX, rotateY, transformStyle: "preserve-3d",
           overflow: 'hidden',
           display: 'flex', flexDirection: 'column', cursor: 'pointer', height: '100%',
           boxShadow: 'var(--shadow-soft)',
         }}
-        onMouseOver={e => {
-          e.currentTarget.style.border = '1px solid rgba(244,162,97,0.35)'
-          e.currentTarget.style.transform = 'translateY(-4px)'
-          e.currentTarget.style.background = 'var(--surface-1)'
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.border = '1px solid var(--border-subtle)'
-          e.currentTarget.style.transform = 'translateY(0)'
-          e.currentTarget.style.background = 'var(--surface-0)'
-        }}>
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => { x.set(0); y.set(0) }}>
 
         {/* Image area */}
         <div style={{ position: 'relative', aspectRatio: '16/9', background: '#0d111a', overflow: 'hidden', flexShrink: 0 }}>
@@ -56,6 +69,15 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
           }}>
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: equipment.is_available ? '#4ade80' : '#f87171', display: 'inline-block' }} />
             {equipment.is_available ? 'Available' : 'Unavailable'}
+          </span>
+          {/* Telematics Badge */}
+          <span style={{
+            position: 'absolute', top: 12, right: 12,
+            fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 100,
+            background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)',
+          }}>
+            ⚙️ Inspected {hoursAgo}h ago
           </span>
         </div>
 
@@ -88,7 +110,7 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
             </span>
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   )
 }

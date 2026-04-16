@@ -22,19 +22,46 @@ export default function CatalogPage() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const [availableOnly, setAvailableOnly] = useState(false)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const ITEMS_PER_PAGE = 12
 
   useEffect(() => {
     const fetchEquipment = async () => {
       setLoading(true)
-      let query = supabase.from('equipment').select('*').order('created_at')
+      let query = supabase.from('equipment').select('*', { count: 'exact' }).order('created_at')
       if (category !== 'All') query = query.eq('category', category.toLowerCase())
       if (availableOnly) query = query.eq('is_available', true)
-      const { data } = await query
+      
+      // Enforce Top 1% Data Scalability Limit
+      query = query.range(0, ITEMS_PER_PAGE - 1)
+
+      const { data, count } = await query
       setEquipment(data || [])
+      setHasMore(count ? count > ITEMS_PER_PAGE : false)
+      setPage(0)
       setLoading(false)
     }
     fetchEquipment()
   }, [category, availableOnly])
+
+  const loadMore = async () => {
+    const nextPage = page + 1
+    let query = supabase.from('equipment').select('*').order('created_at')
+    if (category !== 'All') query = query.eq('category', category.toLowerCase())
+    if (availableOnly) query = query.eq('is_available', true)
+    
+    query = query.range(nextPage * ITEMS_PER_PAGE, (nextPage + 1) * ITEMS_PER_PAGE - 1)
+    
+    const { data } = await query
+    if (data && data.length > 0) {
+      setEquipment(prev => [...prev, ...data])
+      setPage(nextPage)
+      if (data.length < ITEMS_PER_PAGE) setHasMore(false)
+    } else {
+      setHasMore(false)
+    }
+  }
 
   const filtered = equipment.filter(item =>
     item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -155,9 +182,21 @@ export default function CatalogPage() {
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-                {filtered.map(item => <EquipmentCard key={item.id} equipment={item} />)}
-              </div>
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+                  {filtered.map(item => <EquipmentCard key={item.id} equipment={item} />)}
+                </div>
+                
+                {hasMore && !search && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
+                    <button onClick={loadMore} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '14px 28px', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+                    onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}>
+                      Load More Equipment ↓
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
