@@ -18,5 +18,6 @@ export const publicEnv = {
 export function getServerEnv() {
   return {
     resendApiKey: requiredValue(process.env.RESEND_API_KEY, 'RESEND_API_KEY'),
+    resendFromEmail: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
   }
 }

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     // ── 1. Admin notification email ──
     await resend.emails.send({
-      from: 'ConstructRent <onboarding@resend.dev>',
+      from: `ConstructRent <${getServerEnv().resendFromEmail}>`,
       to: [ADMIN_EMAIL],
       subject: `🏗️ New Quote Request: ${equipment}`,
       html: `
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     // ── 2. Customer confirmation email ──
     if (email) {
       await resend.emails.send({
-        from: 'ConstructRent <onboarding@resend.dev>',
+        from: `ConstructRent <${getServerEnv().resendFromEmail}>`,
         to: [email],
         subject: `✅ Quote Request Received — ${equipment}`,
         html: `

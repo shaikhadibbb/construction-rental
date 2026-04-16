@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     })
 
     const { data, error } = await resend.emails.send({
-      from: 'ConstructRent <onboarding@resend.dev>',
+      from: `ConstructRent <${getServerEnv().resendFromEmail}>`,
       to: [to],
       subject: 'Booking Confirmed — ' + equipmentName,
       html,

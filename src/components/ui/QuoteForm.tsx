@@ -11,6 +11,7 @@ import { WHATSAPP_NUMBER, CALL_NUMBER } from '@/lib/constants'
 export default function QuoteForm({ equipmentName }: { equipmentName: string }) {
   const [form, setForm] = useState({ name: '', email: '', phone: '', start_date: '', end_date: '', message: '' })
   const [loading, setLoading] = useState(false)
+  const [loadingStage, setLoadingStage] = useState(0)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,6 +27,20 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
     if (loading) return // Prevent double-submission
 
     setLoading(true)
+    setLoadingStage(0)
+    
+    // Cinematic Loading Progression
+    const stages = [
+      'Generating Logistics Estimate...',
+      'Checking Yard Availability...',
+      'Securing Machine Allocation...',
+      'Finalizing Quote...',
+    ]
+    
+    let stageInterval = setInterval(() => {
+      setLoadingStage(prev => (prev < stages.length - 1 ? prev + 1 : prev))
+    }, 800)
+
     try {
       const { error: dbError } = await supabase.from('bookings').insert({
         customer_name: form.name,
@@ -40,6 +55,9 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
       })
       if (dbError) throw dbError
 
+      // Simulate slight delay for cinematic effect
+      await new Promise(res => setTimeout(res, 1200))
+
       // Fire-and-forget email notification
       fetch('/api/request-quote', {
         method: 'POST',
@@ -51,6 +69,7 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit. Please try again.')
     } finally {
+      clearInterval(stageInterval)
       setLoading(false)
     }
   }
@@ -164,7 +183,7 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
         {loading ? (
           <>
             <span style={{ width: 14, height: 14, border: '2px solid rgba(10,10,10,0.3)', borderTopColor: '#0a0a0a', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
-            Sending…
+            {['Generating Logistics Estimate...', 'Checking Yard Availability...', 'Securing Machine Allocation...', 'Finalizing Quote...'][loadingStage]}
           </>
         ) : '🚀 Get Free Quote Now'}
       </button>

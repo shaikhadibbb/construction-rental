@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Building2, Mail, Phone } from 'lucide-react'
-import { MagneticButton, MotionReveal, TextScramble } from '@/components/motion/motionPrimitives'
+import { MagneticButton, MotionReveal } from '@/components/motion/motionPrimitives'
 import { ADMIN_EMAIL } from '@/lib/constants'
 
 export function PremiumFooter() {
   const [focus, setFocus] = useState(false)
 
   return (
-    <footer className="relative z-10 bg-slate-950 px-6 pb-12 pt-24">
+    <footer className="relative z-10 bg-slate-900 px-6 pb-12 pt-20 text-white">
       <MotionReveal>
         <div className="mx-auto grid w-full max-w-7xl gap-10 md:grid-cols-4">
           <div>
@@ -21,13 +21,13 @@ export function PremiumFooter() {
           </div>
           <div className="space-y-3 text-sm text-slate-300">
             <p className="text-white">Product</p>
-            <Link href="/catalog"><TextScramble text="Fleet" /></Link>
-            <Link href="/faq"><TextScramble text="Pricing" /></Link>
+            <Link href="/catalog">Fleet</Link>
+            <Link href="/faq">Pricing</Link>
           </div>
           <div className="space-y-3 text-sm text-slate-300">
             <p className="text-white">Company</p>
-            <Link href="/about"><TextScramble text="About" /></Link>
-            <Link href="/contact"><TextScramble text="Contact" /></Link>
+            <Link href="/about">About</Link>
+            <Link href="/contact">Contact</Link>
             <a href={`mailto:${ADMIN_EMAIL}`}>{ADMIN_EMAIL}</a>
           </div>
           <div className="space-y-4">
@@ -54,6 +54,14 @@ export function PremiumFooter() {
           </div>
         </div>
       </MotionReveal>
+      <div className="mx-auto mt-10 grid max-w-7xl gap-2 text-xs text-slate-300 md:grid-cols-2">
+        <p>Mumbai HQ: Andheri East | Delhi Office: Okhla Industrial Area | Bangalore Office: Whitefield</p>
+        <p>CIN: U00000MH2024PTC000000 · GST Registered</p>
+        <p>
+          <Link href="/rental-agreement">Terms of Rental</Link> · <Link href="/damage-policy">Damage Policy</Link> · <Link href="/cancellation-policy">Cancellation Policy</Link> · <Link href="/safety-guidelines">Safety Guidelines</Link>
+        </p>
+        <p>Partners: JCB · Tata Hitachi · L&T</p>
+      </div>
       <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-4 text-xs text-slate-400">
         © {new Date().getFullYear()} Construct Rent. All rights reserved.
       </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { updateBookingStatus } from './actions'
 import type { Booking, BookingStatus } from '@/types'
 
 const STATUS_CONFIG: Record<string, { bg: string; border: string; color: string; dot: string; label: string }> = {
@@ -45,11 +46,7 @@ export default function AdminBookingsPage() {
   const updateStatus = async (id: string, newStatus: BookingStatus) => {
     setUpdating(id)
     try {
-      const { error: updateErr } = await supabase
-        .from('bookings')
-        .update({ status: newStatus })
-        .eq('id', id)
-      if (updateErr) throw updateErr
+      await updateBookingStatus(id, newStatus)
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Status update failed')

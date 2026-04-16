@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     await resend.emails.send({
-      from: 'ConstructRent Contact <onboarding@resend.dev>',
+      from: `ConstructRent Contact <${getServerEnv().resendFromEmail}>`,
       to: [ADMIN_EMAIL],
       subject: 'Contact Form: ' + subject,
       html: `
