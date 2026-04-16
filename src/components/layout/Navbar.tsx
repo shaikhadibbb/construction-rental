@@ -94,10 +94,10 @@ export default function Navbar() {
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
-            style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', borderRadius: 10, cursor: 'pointer', padding: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-            <span style={{ width: 18, height: 1.5, background: '#fff', display: 'block', transition: 'all 0.3s', transform: menuOpen ? 'rotate(45deg) translateY(6px)' : 'none' }} />
-            <span style={{ width: 18, height: 1.5, background: '#fff', display: 'block', opacity: menuOpen ? 0 : 1, transition: 'opacity 0.2s' }} />
-            <span style={{ width: 18, height: 1.5, background: '#fff', display: 'block', transition: 'all 0.3s', transform: menuOpen ? 'rotate(-45deg) translateY(-6px)' : 'none' }} />
+            style={{ background: 'var(--surface-1)', border: '1px solid var(--border-subtle)', borderRadius: 10, cursor: 'pointer', padding: 8, minWidth: 48, minHeight: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+            <span style={{ width: 22, height: 2, background: '#fff', display: 'block', transition: 'all 0.3s', transform: menuOpen ? 'rotate(45deg) translateY(6.5px)' : 'none' }} />
+            <span style={{ width: 22, height: 2, background: '#fff', display: 'block', opacity: menuOpen ? 0 : 1, transition: 'opacity 0.2s' }} />
+            <span style={{ width: 22, height: 2, background: '#fff', display: 'block', transition: 'all 0.3s', transform: menuOpen ? 'rotate(-45deg) translateY(-6.5px)' : 'none' }} />
           </button>
         </div>
 
@@ -106,21 +106,21 @@ export default function Navbar() {
             {navLinks.map(link => (
               <Link key={link.href} href={link.href}
                 onClick={() => setMenuOpen(false)}
-                style={{ display: 'block', padding: '12px 0', fontSize: 15, color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 600, borderBottom: '1px solid var(--border-subtle)' }}>
+                style={{ display: 'flex', alignItems: 'center', minHeight: 56, padding: '16px 0', fontSize: 16, color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 600, borderBottom: '1px solid var(--border-subtle)' }}>
                 {link.label}
               </Link>
             ))}
             <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {user ? (
                 <>
-                  <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ display: 'block', color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, padding: '4px 0', fontWeight: 600 }}>Dashboard</Link>
-                  <button onClick={handleLogout} style={{ textAlign: 'left', color: 'var(--text-subtle)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, fontFamily: 'inherit', padding: 0, fontWeight: 600 }}>
+                  <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', minHeight: 48, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 15, padding: '4px 0', fontWeight: 600 }}>Dashboard</Link>
+                  <button onClick={handleLogout} style={{ textAlign: 'left', color: 'var(--text-subtle)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, minHeight: 48, fontFamily: 'inherit', padding: 0, fontWeight: 600 }}>
                     Logout
                   </button>
                 </>
               ) : (
-                <Link href="/catalog" onClick={() => setMenuOpen(false)} className="ui-button-primary" style={{ width: 'fit-content', padding: '12px 18px', fontSize: 14 }}>
-                  Get Quote →
+                <Link href="/catalog" onClick={() => setMenuOpen(false)} className="ui-button-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 56, padding: '12px 18px', fontSize: 15 }}>
+                  Check Availability →
                 </Link>
               )}
             </div>

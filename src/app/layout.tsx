@@ -12,14 +12,14 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space
 export const metadata: Metadata = {
   metadataBase: new URL('https://constructrent.in'),
   title: {
-    default: 'Construct Rent | Premium Construction Equipment Rental',
-    template: '%s | Construct Rent'
+    default: 'ConstructRent — Same-Day Equipment Delivery & Rental',
+    template: '%s | ConstructRent'
   },
-  description: 'Rent professional construction equipment across India. Excavators, cranes, forklifts and more. Get a free quote in 2 hours. Serving Mumbai, Ahmedabad, Gujarat and all of India.',
-  keywords: ['construction equipment rental', 'excavator rental', 'crane rental', 'forklift rental', 'JCB rental', 'equipment hire India'],
+  description: 'Rent verified excavators, cranes, and heavy construction equipment. Same-day delivery, fully insured fleet ($5M coverage), and 24/7 breakdown support across India.',
+  keywords: ['heavy equipment rental', 'excavator rental', 'crane rental near me', 'B2B construction tools', 'same-day equipment delivery', 'rent JCB India'],
   openGraph: {
-    title: 'Construct Rent | Excavator & Crane Rental',
-    description: 'Rent excavators and cranes quickly with insured equipment and certified operators.',
+    title: 'ConstructRent: Same-Day Heavy Equipment Rental',
+    description: 'Rent verified excavators and cranes with guaranteed on-site delivery and 24/7 support.',
     type: 'website',
     siteName: 'ConstructRent',
     images: ['/og-construct-rent.jpg'],
