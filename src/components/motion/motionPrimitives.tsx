@@ -36,19 +36,21 @@ export function MotionReveal({
 export function FloatingCard({
   children,
   className,
+  style,
 }: {
   children: ReactNode
   className?: string
+  style?: React.CSSProperties
 }) {
   const reduceMotion = useReducedMotion()
-  if (reduceMotion) return <div className={className}>{children}</div>
+  if (reduceMotion) return <div className={className} style={style}>{children}</div>
 
   return (
     <motion.div
       className={className}
       whileHover={{ scale: 1.02, y: -8 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      style={{ willChange: 'transform' }}
+      style={{ willChange: 'transform', ...style }}
     >
       {children}
     </motion.div>
