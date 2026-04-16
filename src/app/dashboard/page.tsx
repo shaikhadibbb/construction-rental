@@ -97,9 +97,9 @@ export default function DashboardPage() {
           {/* Bento Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
             {/* Main Spend Block */}
-            <div className="ui-card" style={{ gridColumn: 'span 12', padding: '32px', '@media (min-width: 768px)': { gridColumn: 'span 6' } as any, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <p style={{ fontSize: 13, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700, marginBottom: 8 }}>Total Fleet Spend</p>
-              <p style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>
+            <div className="ui-card col-span-12 md:col-span-6 p-8 flex flex-col justify-center">
+              <p className="text-sm text-subtle uppercase tracking-wider font-bold mb-2">Total Fleet Spend</p>
+              <p className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-none">
                 {stats.spent > 0 ? `₹${stats.spent.toLocaleString('en-IN')}` : '—'}
               </p>
             </div>
