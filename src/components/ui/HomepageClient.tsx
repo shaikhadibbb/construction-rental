@@ -28,7 +28,7 @@ export default function HomepageClient() {
   }, [])
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-slate-100 text-slate-900">
+    <div className="ui-page-shell relative min-h-screen overflow-x-hidden">
       <AnimatePresence mode="wait" onExitComplete={() => setContentReady(true)}>
         {loading ? (
           <motion.div
@@ -83,7 +83,7 @@ export default function HomepageClient() {
               <a href="tel:+919999999999" className="flex-1 rounded-xl bg-coral px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
                 Call Support
               </a>
-              <a href="/dashboard" className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900">
+              <a href="/dashboard" className="flex-1 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-white">
                 My Bookings
               </a>
             </div>
