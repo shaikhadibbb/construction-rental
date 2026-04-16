@@ -5,7 +5,7 @@ import { Resend } from 'resend'
 import { getServerEnv } from '@/lib/env'
 
 export async function updateBookingStatus(id: string, newStatus: string) {
-  const supabase = createActionClient()
+  const supabase = await createActionClient()
   
   // 1. Update Booking Status
   const { data: booking, error } = await supabase
