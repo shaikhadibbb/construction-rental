@@ -87,3 +87,62 @@ create table if not exists damage_claims (
   resolution_status text not null check (resolution_status in ('open', 'review', 'resolved')),
   created_at timestamptz default now()
 );
+
+-- loyaty system & contractor credits
+create or replace function award_booking_credits()
+returns trigger as $$
+declare
+  earned_credits numeric;
+begin
+  -- Award 2% of total_amount as credits points
+  if new.status = 'confirmed' and (tg_op = 'INSERT' or old.status != 'confirmed') then
+    earned_credits := round(new.total_amount * 0.02);
+    update profiles set credits_balance = credits_balance + earned_credits where id = new.user_id;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists booking_credits_trigger on bookings;
+create trigger booking_credits_trigger
+after insert or update on bookings
+for each row execute function award_booking_credits();
+
+-- redemption RPC
+create or replace function spend_credits_and_book(
+  p_user_id uuid,
+  p_equipment_id uuid,
+  p_start_date date,
+  p_end_date date,
+  p_total_before_discount numeric,
+  p_credits_to_use numeric
+) returns jsonb as $$
+declare
+  v_current_credits numeric;
+  v_booking_id uuid;
+  v_final_amount numeric;
+begin
+  -- 1. verify balance
+  select credits_balance into v_current_credits from profiles where id = p_user_id for update;
+  if p_credits_to_use > 0 and (v_current_credits is null or v_current_credits < p_credits_to_use) then
+    raise exception 'Insufficient credits. You only have %', coalesce(v_current_credits, 0);
+  end if;
+
+  -- 2. deduct
+  if p_credits_to_use > 0 then
+    update profiles set credits_balance = credits_balance - p_credits_to_use where id = p_user_id;
+  end if;
+
+  v_final_amount := p_total_before_discount - p_credits_to_use;
+  if v_final_amount < 0 then
+    v_final_amount := 0;
+  end if;
+
+  -- 3. create booking
+  insert into bookings (user_id, equipment_id, start_date, end_date, total_amount, status, booking_mode, city, price_breakdown) 
+  values (p_user_id, p_equipment_id, p_start_date, p_end_date, v_final_amount, 'confirmed', 'b2c', 'Mumbai', '{}'::jsonb)
+  returning id into v_booking_id;
+
+  return jsonb_build_object('success', true, 'booking_id', v_booking_id, 'final_amount', v_final_amount);
+end;
+$$ language plpgsql;

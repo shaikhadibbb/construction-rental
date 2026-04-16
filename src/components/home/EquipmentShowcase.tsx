@@ -1,13 +1,14 @@
 'use client'
 
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Equipment } from '@/types'
 import { FloatingCard, MotionReveal } from '@/components/motion/motionPrimitives'
 import { calculateManagedMarketplacePrice } from '@/lib/managed-marketplace/pricingEngine'
-import { operators } from '@/lib/managed-marketplace/mockData'
 import { isWithinServiceRadius } from '@/lib/managed-marketplace/depotNetwork'
+import { supabase } from '@/lib/supabase'
+import type { OperatorProfile } from '@/lib/managed-marketplace/types'
 
 export function EquipmentShowcase({ equipment }: { equipment: Equipment[] }) {
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -17,6 +18,26 @@ export function EquipmentShowcase({ equipment }: { equipment: Equipment[] }) {
   const [prioritySupport, setPrioritySupport] = useState(false)
   const [fuelTopUp, setFuelTopUp] = useState(false)
   const [today] = useState(() => new Date().toISOString().slice(0, 10))
+  const [dbOperators, setDbOperators] = useState<OperatorProfile[]>([])
+
+  useEffect(() => {
+    supabase.from('operators').select('*').eq('police_verified', true).then(({ data }) => {
+      if (data) {
+        // Map db columns to TS interfaces
+        setDbOperators(data.map((op: any) => ({
+          id: op.id,
+          name: op.full_name,
+          licenseNumber: op.license_number,
+          yearsExperience: op.years_experience,
+          languages: op.languages || [],
+          specialization: op.specialization as any,
+          isPoliceVerified: op.police_verified,
+          rating: op.rating || 0,
+          isAvailable: true // fallback missing db column
+        })))
+      }
+    })
+  }, [])
 
   const detailData = useMemo(() => ({
     'JCB 3DX Super Excavator': { specs: '3 Ton | Diesel | Bucket 0.3m³', availability: 'Available Tomorrow', sheet: 'Height: 2.7m · Weight: 7,600kg · Transport: 10-wheeler trailer' },
@@ -27,7 +48,7 @@ export function EquipmentShowcase({ equipment }: { equipment: Equipment[] }) {
 
   const activeEquipment = equipment.find(item => item.id === activeId) || null
   const activeMeta = activeEquipment ? detailData[activeEquipment.name as keyof typeof detailData] || detailData.fallback : null
-  const primaryOperator = operators.find(op => op.isAvailable)
+  const primaryOperator = dbOperators.find(op => op.isAvailable)
 
   const pricing = activeEquipment
     ? calculateManagedMarketplacePrice({
@@ -216,6 +237,9 @@ export function EquipmentShowcase({ equipment }: { equipment: Equipment[] }) {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
                         <span>Pay 20% now to confirm</span><span>₹{pricing.advancePayable.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#4ade80', fontWeight: 700, background: 'rgba(74,222,128,0.08)', padding: '8px 12px', borderRadius: 8, marginTop: 4 }}>
+                        <span>💸 Contractor Credits Earned</span><span>+₹{Math.round(pricing.total * 0.02).toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>

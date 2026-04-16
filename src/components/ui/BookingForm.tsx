@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { Equipment } from '@/types'
@@ -19,6 +19,18 @@ export default function BookingForm({ equipment }: Props) {
   const [endDate, setEndDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [creditsBalance, setCreditsBalance] = useState(0)
+  const [useCredits, setUseCredits] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        supabase.from('profiles').select('credits_balance').eq('id', user.id).single().then(({ data }) => {
+          if (data) setCreditsBalance(data.credits_balance || 0)
+        })
+      }
+    })
+  }, [])
 
   const calcDays = () => {
     if (!startDate || !endDate) return 0
@@ -28,6 +40,8 @@ export default function BookingForm({ equipment }: Props) {
 
   const days = calcDays()
   const total = days * equipment.daily_rate
+  const creditsToUse = useCredits ? Math.min(creditsBalance, total) : 0
+  const finalTotal = total - creditsToUse
 
   const handleBooking = async () => {
     setError('')
@@ -40,20 +54,19 @@ export default function BookingForm({ equipment }: Props) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          equipment_id: equipment.id,
-          start_date: startDate,
-          end_date: endDate,
-          total_amount: total,
-          status: 'confirmed',
-        })
-        .select()
-        .single()
+      // Fire secure transaction RPC
+      const { data: bookingData, error: bookingError } = await supabase.rpc('spend_credits_and_book', {
+        p_user_id: user.id,
+        p_equipment_id: equipment.id,
+        p_start_date: startDate,
+        p_end_date: endDate,
+        p_total_before_discount: total,
+        p_credits_to_use: creditsToUse
+      })
 
       if (bookingError) throw bookingError
+      
+      const bookingId = bookingData.booking_id
 
       // Send confirmation email (non-blocking)
       fetch('/api/send-email', {
@@ -65,9 +78,9 @@ export default function BookingForm({ equipment }: Props) {
           equipmentName: equipment.name,
           startDate,
           endDate,
-          totalAmount: total,
+          totalAmount: finalTotal,
           days,
-          bookingId: booking.id,
+          bookingId: bookingId,
         }),
       }).catch(console.error) // Fire-and-forget
 
@@ -128,9 +141,24 @@ export default function BookingForm({ equipment }: Props) {
             <span>₹{equipment.daily_rate.toLocaleString('en-IN')}/day × {days} day{days !== 1 ? 's' : ''}</span>
             <span>₹{total.toLocaleString('en-IN')}</span>
           </div>
+
+          {creditsBalance > 0 && (
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: '#fff', background: 'rgba(74,222,128,0.1)', padding: '10px 12px', borderRadius: 8, marginBottom: 8, border: '1px solid rgba(74,222,128,0.2)', cursor: 'pointer' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="checkbox" checked={useCredits} onChange={e => setUseCredits(e.target.checked)} style={{ accentColor: '#4ade80', width: 14, height: 14 }} />
+                <span>Use Contractor Credits (Balance: ₹{creditsBalance.toLocaleString('en-IN')})</span>
+              </span>
+              {useCredits && <span style={{ color: '#4ade80', fontWeight: 700 }}>-₹{creditsToUse.toLocaleString('en-IN')}</span>}
+            </label>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>
+            <span>Contractor Credits Earned (2%)</span>
+            <span style={{ color: '#4ade80', fontWeight: 700 }}>+₹{Math.round(finalTotal * 0.02).toLocaleString('en-IN')}</span>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, color: '#fff', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 10 }}>
-            <span>Total</span>
-            <span style={{ color: '#f4a261' }}>₹{total.toLocaleString('en-IN')}</span>
+            <span>Total Payable</span>
+            <span style={{ color: '#f4a261' }}>₹{finalTotal.toLocaleString('en-IN')}</span>
           </div>
         </div>
       )}
@@ -157,7 +185,7 @@ export default function BookingForm({ equipment }: Props) {
             Booking…
           </>
         ) : days > 0 ? (
-          `Confirm Booking — ₹${total.toLocaleString('en-IN')}`
+          `Confirm Booking — ₹${finalTotal.toLocaleString('en-IN')}`
         ) : (
           'Select dates to book'
         )}

@@ -50,6 +50,7 @@ export interface Profile {
   phone?: string
   role?: 'user' | 'admin'
   is_admin?: boolean
+  credits_balance?: number
   created_at?: string
 }
 

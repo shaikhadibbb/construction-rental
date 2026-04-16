@@ -15,6 +15,8 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
 
+  const today = new Date().toISOString().split('T')[0]
+
   const whatsappMessage = encodeURIComponent(`Hi! I want to rent the *${equipmentName}*. Please share pricing and availability.`)
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`
 
@@ -156,12 +158,12 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <div>
           <label htmlFor="qf-start" style={labelStyle}>Start Date</label>
-          <input id="qf-start" type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} style={inputStyle}
+          <input id="qf-start" type="date" min={today} value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} style={inputStyle}
             onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.5)')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
         </div>
         <div>
           <label htmlFor="qf-end" style={labelStyle}>End Date</label>
-          <input id="qf-end" type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} style={inputStyle}
+          <input id="qf-end" type="date" min={form.start_date || today} value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} style={inputStyle}
             onFocus={e => (e.target.style.borderColor = 'rgba(244,162,97,0.5)')} onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')} />
         </div>
       </div>

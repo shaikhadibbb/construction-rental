@@ -88,6 +88,17 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          <div style={{ background: 'linear-gradient(120deg, rgba(74,222,128,0.1), rgba(74,222,128,0.02))', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 16, padding: '20px 24px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 800, color: '#4ade80', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>💸 Available Credits</p>
+              <p style={{ fontSize: 32, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>₹{(profile?.credits_balance || 0).toLocaleString('en-IN')}</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>Applies automatically to next rental.</p>
+              <p style={{ fontSize: 11, color: 'rgba(74,222,128,0.6)', marginTop: 4 }}>Earn 2% back on all completed bookings.</p>
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             {[
               { label: 'Total Quotes', value: bookings.length },

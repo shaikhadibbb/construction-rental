@@ -3,26 +3,67 @@ import { Resend } from 'resend'
 import { ADMIN_EMAIL, CALL_NUMBER, SITE_URL } from '@/lib/constants'
 import { getServerEnv } from '@/lib/env'
 
+/** Sanitize user input before embedding in HTML to prevent XSS */
+function esc(str: string | undefined | null): string {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .slice(0, 2000) // hard cap — no unbounded input
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const resend = new Resend(getServerEnv().resendApiKey)
-    const { name, email, phone, equipment, start_date, end_date, message } = (await request.json()) as {
-      name?: string
-      email?: string
-      phone?: string
-      equipment?: string
-      start_date?: string
-      end_date?: string
-      message?: string
-    }
-    if (!name || !email || !equipment) {
-      return NextResponse.json({ error: 'Name, email, and equipment are required' }, { status: 400 })
+    // ── Payload size guard (prevent large body DoS) ──
+    const contentLength = Number(request.headers.get('content-length') ?? '0')
+    if (contentLength > 10_000) {
+      return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
     }
 
-    // ── 1. Admin notification email ──
+    const resend = new Resend(getServerEnv().resendApiKey)
+    const raw = (await request.json()) as {
+      name?: string; email?: string; phone?: string
+      equipment?: string; start_date?: string; end_date?: string; message?: string
+    }
+
+    // ── Input validation ──────────────────────────────────────────
+    if (!raw.name?.trim() || !raw.email?.trim() || !raw.equipment?.trim()) {
+      return NextResponse.json({ error: 'Name, email, and equipment are required' }, { status: 400 })
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw.email)) {
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
+    }
+
+    // ── Date validation ───────────────────────────────────────────
+    if (raw.start_date && raw.end_date) {
+      const start = new Date(raw.start_date)
+      const end = new Date(raw.end_date)
+      const today = new Date(); today.setHours(0, 0, 0, 0)
+      if (start < today) {
+        return NextResponse.json({ error: 'Start date cannot be in the past' }, { status: 400 })
+      }
+      if (end <= start) {
+        return NextResponse.json({ error: 'End date must be after start date' }, { status: 400 })
+      }
+    }
+
+    // ── Sanitize all user-supplied fields ─────────────────────────
+    const name = esc(raw.name)
+    const email = esc(raw.email)
+    const phone = esc(raw.phone)
+    const equipment = esc(raw.equipment)
+    const start_date = esc(raw.start_date)
+    const end_date = esc(raw.end_date)
+    const message = esc(raw.message)
+
+    // ── 1. Admin notification email ───────────────────────────────
     await resend.emails.send({
       from: `ConstructRent <${getServerEnv().resendFromEmail}>`,
       to: [ADMIN_EMAIL],
+      replyTo: raw.email, // safe email from raw — Resend validates this separately
       subject: `🏗️ New Quote Request: ${equipment}`,
       html: `
         <!DOCTYPE html>
@@ -36,20 +77,18 @@ export async function POST(request: NextRequest) {
                 <!-- Header -->
                 <tr>
                   <td style="background:#0a1628;padding:32px 40px">
-                    <table width="100%">
-                      <tr>
-                        <td>
-                          <div style="display:inline-block;background:#eab308;border-radius:8px;padding:8px 12px;margin-bottom:16px">
-                            <span style="color:#0a1628;font-weight:900;font-size:14px">🏗️ CR</span>
-                          </div>
-                          <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:900">New Quote Request</h1>
-                          <p style="margin:8px 0 0;color:#9ca3af;font-size:14px">Someone wants to rent equipment</p>
-                        </td>
-                        <td align="right" valign="top">
-                          <span style="background:#eab308;color:#0a1628;font-weight:900;font-size:12px;padding:6px 14px;border-radius:999px">ACTION REQUIRED</span>
-                        </td>
-                      </tr>
-                    </table>
+                    <table width="100%"><tr>
+                      <td>
+                        <div style="display:inline-block;background:#eab308;border-radius:8px;padding:8px 12px;margin-bottom:16px">
+                          <span style="color:#0a1628;font-weight:900;font-size:14px">🏗️ CR</span>
+                        </div>
+                        <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:900">New Quote Request</h1>
+                        <p style="margin:8px 0 0;color:#9ca3af;font-size:14px">Someone wants to rent equipment</p>
+                      </td>
+                      <td align="right" valign="top">
+                        <span style="background:#eab308;color:#0a1628;font-weight:900;font-size:12px;padding:6px 14px;border-radius:999px">ACTION REQUIRED</span>
+                      </td>
+                    </tr></table>
                   </td>
                 </tr>
 
@@ -75,8 +114,8 @@ export async function POST(request: NextRequest) {
                         ['💬 Notes', message || 'None'],
                       ].map(([label, value], i) => `
                         <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#ffffff'}">
-                          <td style="padding:12px 16px;font-size:13px;font-weight:600;color:#374151;width:140px;border-radius:8px 0 0 8px">${label}</td>
-                          <td style="padding:12px 16px;font-size:13px;color:#111827;border-radius:0 8px 8px 0">${value}</td>
+                          <td style="padding:12px 16px;font-size:13px;font-weight:600;color:#374151;width:140px">${label}</td>
+                          <td style="padding:12px 16px;font-size:13px;color:#111827">${value}</td>
                         </tr>
                       `).join('')}
                     </table>
@@ -96,7 +135,7 @@ export async function POST(request: NextRequest) {
                 <!-- Footer -->
                 <tr>
                   <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 40px">
-                    <p style="margin:0;color:#9ca3af;font-size:12px">ConstructRent · Mumbai, Maharashtra · Reply to this email to contact the customer directly at ${email}</p>
+                    <p style="margin:0;color:#9ca3af;font-size:12px">ConstructRent · Mumbai, Maharashtra</p>
                   </td>
                 </tr>
 
@@ -108,11 +147,11 @@ export async function POST(request: NextRequest) {
       `
     })
 
-    // ── 2. Customer confirmation email ──
-    if (email) {
+    // ── 2. Customer confirmation email ────────────────────────────
+    if (raw.email) {
       await resend.emails.send({
         from: `ConstructRent <${getServerEnv().resendFromEmail}>`,
-        to: [email],
+        to: [raw.email],
         subject: `✅ Quote Request Received — ${equipment}`,
         html: `
           <!DOCTYPE html>
@@ -128,9 +167,6 @@ export async function POST(request: NextRequest) {
                     <td style="background:#0a1628;padding:40px;text-align:center">
                       <div style="display:inline-block;background:#eab308;border-radius:10px;padding:10px 16px;margin-bottom:20px">
                         <span style="color:#0a1628;font-weight:900;font-size:16px">🏗️ ConstructRent</span>
-                      </div>
-                      <div style="width:64px;height:64px;background:#22c55e;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
-                        <span style="font-size:28px">✅</span>
                       </div>
                       <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:900">Quote Request Received!</h1>
                       <p style="margin:10px 0 0;color:#9ca3af;font-size:15px">We'll get back to you within 2 hours</p>
@@ -151,11 +187,9 @@ export async function POST(request: NextRequest) {
                   <tr>
                     <td style="padding:24px 40px">
                       <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
-                        <tr>
-                          <td style="background:#0a1628;padding:14px 20px">
-                            <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Your Request Summary</p>
-                          </td>
-                        </tr>
+                        <tr><td style="background:#0a1628;padding:14px 20px">
+                          <p style="margin:0;color:#9ca3af;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Your Request Summary</p>
+                        </td></tr>
                         ${[
                           ['Equipment', equipment],
                           ['Rental Period', start_date && end_date ? `${start_date} → ${end_date}` : 'To be confirmed'],
@@ -218,7 +252,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Email error:', error)
+    console.error('Quote email error:', error)
     return NextResponse.json({ error: 'Failed to send' }, { status: 500 })
   }
 }

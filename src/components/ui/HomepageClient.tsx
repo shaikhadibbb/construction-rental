@@ -8,7 +8,7 @@ import { EquipmentShowcase } from '@/components/home/EquipmentShowcase'
 import { FeaturesBento } from '@/components/home/FeaturesBento'
 import { VideoDemo } from '@/components/home/VideoDemo'
 import { PricingSection } from '@/components/home/PricingSection'
-import { PremiumFooter } from '@/components/home/PremiumFooter'
+import Footer from '@/components/layout/Footer'
 
 const demoEquipment = [
   { id: '1', name: 'JCB 3DX Super Excavator', category: 'Excavator', daily_rate: 2500, image_url: 'https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&w=1200&q=70', is_available: true },
@@ -76,7 +76,7 @@ export default function HomepageClient() {
             <FeaturesBento />
             <VideoDemo />
             <PricingSection />
-            <PremiumFooter />
+            <Footer />
             <div className="fixed bottom-4 left-1/2 z-50 flex w-[92%] -translate-x-1/2 gap-2 md:hidden">
               <a href="tel:+919999999999" className="flex-1 rounded-xl bg-coral px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
                 Call Support

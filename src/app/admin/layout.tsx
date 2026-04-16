@@ -44,22 +44,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         const isAdmin = hasAdminRole(user, profile)
 
-        // If profile exists and clearly does not have admin role, block access.
-        // If profile is missing / schema differs / RLS blocks profile read, avoid false negatives.
-        if (!isAdmin && profile) {
+        if (!isAdmin) {
           router.push('/')
           return
-        }
-
-        if (error) {
-          const benignProfileError =
-            error.code === 'PGRST116' ||
-            /is_admin/.test(error.message) ||
-            /permission denied/i.test(error.message)
-          if (!benignProfileError) {
-            router.push('/')
-            return
-          }
         }
 
         setChecking(false)
