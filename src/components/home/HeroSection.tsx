@@ -28,16 +28,16 @@ export function HeroSection() {
 
           <MotionReveal delay={0.2}>
             <h1 className="font-space-grotesk text-4xl font-bold tracking-[-0.02em] text-white md:text-7xl">
-              Rent Excavators &amp; Cranes in Mumbai, Delhi, Bangalore
+              Same-Day Equipment Delivery — Book Online in 2 Minutes
             </h1>
           </MotionReveal>
 
           <MotionReveal delay={0.4}>
-            <p className="mt-5 max-w-3xl text-lg text-white/85 md:text-xl">
-              India&apos;s largest construction equipment rental network. 500+ machines across 50 cities. Delivered to your site in 2 hours.
+            <p className="mt-5 max-w-3xl text-lg text-white/85 md:text-xl font-medium">
+              Fleet ready. On-site fast. Zero downtime.
             </p>
             <p className="mt-2 max-w-3xl text-base text-white/75">
-              Rent verified excavators, cranes, and lifts in under 2 hours. Fully insured. Pan-India logistics.
+              Verified excavators, cranes, and lifts dispatched to your job site instantly. No more phone-tag.
             </p>
           </MotionReveal>
 
@@ -60,19 +60,30 @@ export function HeroSection() {
             </div>
           </MotionReveal>
 
-          <div className="mt-8 grid gap-3 text-sm text-white md:grid-cols-2">
             {[
-              { label: 'ISO Certified Equipment', Icon: BadgeCheck },
-              { label: '₹5 Crore Insurance Coverage', Icon: ShieldCheck },
-              { label: 'Licensed Operators Available', Icon: HardHat },
-              { label: '24/7 Breakdown Support', Icon: Wrench },
+              { label: 'OSHA & DOT Certified Fleet', Icon: BadgeCheck },
+              { label: 'Fully Licensed & Insured ($5M)', Icon: ShieldCheck },
+              { label: 'Google 5-Star Rated (150+ Reviews)', Icon: HardHat },
+              { label: 'Free Delivery within 30 Miles', Icon: Wrench },
             ].map(({ label, Icon }) => (
               <div key={label} className="flex items-center gap-2 rounded-lg border border-white/20 bg-black/25 px-3 py-2">
-                <Icon size={16} className="text-[#FFD700]" />
-                <span>{label}</span>
+                <Icon size={16} className="text-[#4ade80]" />
+                <span className="font-medium text-white">{label}</span>
               </div>
             ))}
           </div>
+
+          <MotionReveal delay={0.6}>
+            <div className="mt-8 flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/50 p-4 backdrop-blur-md md:w-max">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
+                📍
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">We Deliver to Your Job Site</p>
+                <p className="text-xs text-white/60">HQ: 124 Industrial Pkwy, Mumbai • Radius: 50km</p>
+              </div>
+            </div>
+          </MotionReveal>
         </div>
       </div>
     </section>

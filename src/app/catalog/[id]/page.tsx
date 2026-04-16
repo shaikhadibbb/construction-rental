@@ -48,10 +48,37 @@ export default async function EquipmentDetailPage({ params }: { params: Promise<
     ? (typedReviews.reduce((sum, r) => sum + (r.rating || 5), 0) / typedReviews.length).toFixed(1)
     : null
 
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: equipment.name,
+    description: equipment.description || `Rent ${equipment.name} (${equipment.category})`,
+    image: images,
+    brand: { '@type': 'Brand', name: 'ConstructRent' },
+    offers: {
+      '@type': 'Offer',
+      url: `https://constructrent.in/catalog/${equipment.id}`,
+      priceCurrency: 'INR',
+      price: equipment.daily_rate,
+      priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      itemCondition: 'https://schema.org/UsedCondition',
+      availability: equipment.is_available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: 'ConstructRent HQ' }
+    },
+    ...(avgRating && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: avgRating,
+        reviewCount: typedReviews.length
+      }
+    })
+  }
+
   const surfaceStyle: React.CSSProperties = { background: 'var(--surface-0)', border: '1px solid var(--border-subtle)', borderRadius: 24, padding: '24px', boxShadow: 'var(--shadow-soft)' }
 
   return (
     <div className="ui-page-shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
 
       {/* Breadcrumb Bar */}
       <div style={{ background: 'var(--surface-0)', borderBottom: '1px solid var(--border-subtle)' }}>

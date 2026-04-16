@@ -185,7 +185,7 @@ export default function QuoteForm({ equipmentName }: { equipmentName: string }) 
             <span style={{ width: 14, height: 14, border: '2px solid rgba(10,10,10,0.3)', borderTopColor: '#0a0a0a', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
             {['Generating Logistics Estimate...', 'Checking Yard Availability...', 'Securing Machine Allocation...', 'Finalizing Quote...'][loadingStage]}
           </>
-        ) : '🚀 Get Free Quote Now'}
+        ) : '🗓️ Check Live Availability'}
       </button>
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: 16, color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>
